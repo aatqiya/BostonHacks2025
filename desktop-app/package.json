@@ -1,0 +1,33 @@
+{
+  "name": "desktop-app",
+  "version": "1.0.0",
+  "description": "CyberPet Guardian Frontend (Electron/React)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:css": "./node_modules/.bin/tailwindcss -i ./src/index.css -o ./dist/tailwind.css --watch",
+    "build:js": "npx babel src --out-dir dist --extensions .jsx,.js --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "electron",
+    "react",
+    "security"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "autoprefixer": "^10.4.19",
+    "electron": "^27.0.0",
+    "howler": "^2.2.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "socket.io-client": "^4.5.4",
+    "tailwindcss": "^3.4.4"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.24.8",
+    "@babel/core": "^7.24.9",
+    "@babel/preset-react": "^7.24.7"
+  }
+}
