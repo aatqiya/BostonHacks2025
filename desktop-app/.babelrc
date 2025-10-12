@@ -1,0 +1,6 @@
+// desktop-app/.babel.config.js
+{
+    "presets": [
+        "@babel/preset-react"
+    ]
+}
