@@ -115,7 +115,7 @@ export default function InterventionPopup() {
                 {/* Pet Stats Panel - Always shown */}
                 <div className="mb-4 p-4 bg-gray-800 rounded-lg text-white">
                     <h3 className="text-lg font-bold text-green-400 mb-3 text-center">
-                        🛡️ CyberPet Status
+                        FrostByte Stats
                     </h3>
 
                     <div className="space-y-3">

@@ -16,7 +16,8 @@ function createPetWindow() {
         y: height - 200,
 
         frame: false,
-        transparent: false,
+        transparent: true,
+        backgroundColor: '#00000000', // Explicitly set transparent background
         alwaysOnTop: true,
         resizable: false,
         skipTaskbar: true,
