@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Blocked - FreezeByte</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a192f 0%, #1e3a5f 100%);
+            color: #e6f1ff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .blocker-container {
+            background: rgba(30, 58, 95, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4); /* Reduced shadow */
+            border: 2px solid #ff6b6b;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .freezebye-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .freezebye-icon {
+            width: 60px;
+            height: 60px;
+            background: url('assets/bgicon.png') center/contain no-repeat;
+            filter: drop-shadow(0 3px 8px rgba(255, 107, 107, 0.3)); /* Reduced shadow */
+        }
+        
+        .freezebye-text {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #4fc3f7, #29b6f6, #0288d1); /* Blue gradient */
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .warning-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        h1 {
+            color: #ff6b6b;
+            font-size: 32px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .url-display {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid #ff6b6b;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .reason {
+            background: rgba(255, 183, 77, 0.1); /* Orange instead of yellow */
+            border: 1px solid #ffb74d;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .reason h3 {
+            color: #ffb74d; /* Orange instead of yellow */
+            margin-bottom: 10px;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+        
+        .btn-safe {
+            background: #4fc3f7; /* Blue instead of cyan */
+            color: #0a192f;
+        }
+        
+        .btn-safe:hover {
+            background: #29b6f6;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+        
+        .pet-message {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(79, 195, 247, 0.1); /* Blue instead of cyan */
+            border: 1px solid #4fc3f7;
+            border-radius: 10px;
+            font-style: italic;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #3a506b;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #4fc3f7; /* Blue instead of cyan */
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #a8b2d1;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="blocker-container">
+        <div class="freezebye-header">
+            <div class="freezebye-icon"></div>
+            <div class="freezebye-text">FreezeByte</div>
+        </div>
+        
+        <div class="warning-icon">🚫</div>
+        <h1>Website Blocked!</h1>
+        
+        <div class="url-display" id="blockedUrl">Loading...</div>
+        
+        <div class="reason">
+            <h3>⚠️ Security Warning</h3>
+            <p><strong>FreezeByte</strong> believes this website is malicious and unsafe to use.</p>
+            <p>This site has been flagged as part of a community-maintained database of known phishing websites and scams. If you believe the site has been flagged in error, please file an issue.</p>
+        </div>
+        
+        <div class="pet-message">
+            ❄️ "I'm protecting you from potential harm! This site looks dangerous and may try to steal your information." - Frost
+        </div>
+        
+        <div class="actions">
+            <button class="btn btn-safe" id="goBackBtn">← Go Back to Safety</button>
+            <button class="btn btn-danger" id="proceedBtn">Ignore Warning & Proceed Anyway</button>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="threatsBlocked">0</div>
+                <div class="stat-label">Threats Blocked</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="sitesProtected">100+</div>
+                <div class="stat-label">Sites Protected</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Active Protection</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get blocked URL from query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const blockedUrl = urlParams.get('url') || 'unknown-website.com';
+        
+        document.getElementById('blockedUrl').textContent = blockedUrl;
+        
+        // Update threats blocked count
+        chrome.runtime.sendMessage({ action: 'getSystemStats' }, (response) => {
+            if (response.stats) {
+                document.getElementById('threatsBlocked').textContent = response.stats.threatsBlocked;
+            }
+        });
+        
+        // Button handlers
+        document.getElementById('goBackBtn').addEventListener('click', () => {
+            window.history.back();
+        });
+        
+        document.getElementById('proceedBtn').addEventListener('click', () => {
+            chrome.runtime.sendMessage({ 
+                action: 'bypassBlock', 
+                url: blockedUrl 
+            }, () => {
+                window.close();
+            });
+        });
+    </script>
+</body>
+</html>

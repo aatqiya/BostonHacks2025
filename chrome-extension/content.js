@@ -1,152 +1,164 @@
-// Content script for password monitoring and page analysis
-console.log('🔒 CyberPet content script loaded');
+// content.js - OPTIMIZED Page-level security monitoring
+console.log('🔒 CyberPet OPTIMIZED content script loaded');
 
-class PasswordMonitor {
-  constructor() {
-    this.weakPasswords = [];
-    this.init();
-  }
+class OptimizedPageSecurityMonitor {
+    constructor() {
+        this.initialized = false;
+        this.init();
+    }
 
-  init() {
-    // Monitor password input fields
-    this.monitorPasswordFields();
-    
-    // Check for password fields on page load
-    this.checkExistingPasswordFields();
-    
-    // Monitor dynamic content changes
-    this.observeDOMChanges();
-  }
+    init() {
+        if (this.initialized) return;
+        
+        this.fastMonitorPasswordFields();
+        this.immediateSecurityCheck();
+        console.log('⚡ Optimized page security monitoring started');
+        this.initialized = true;
+    }
 
-  monitorPasswordFields() {
-    document.addEventListener('input', (event) => {
-      if (event.target.type === 'password') {
-        this.analyzePasswordStrength(event.target.value);
-      }
-    });
-
-    document.addEventListener('submit', (event) => {
-      const passwordFields = document.querySelectorAll('input[type="password"]');
-      passwordFields.forEach(field => {
-        if (field.value) {
-          this.analyzePasswordStrength(field.value);
-        }
-      });
-    });
-  }
-
-  checkExistingPasswordFields() {
-    const passwordFields = document.querySelectorAll('input[type="password"]');
-    passwordFields.forEach(field => {
-      if (field.value) {
-        this.analyzePasswordStrength(field.value);
-      }
-    });
-  }
-
-  observeDOMChanges() {
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (node.nodeType === 1) { // Element node
-            const passwordFields = node.querySelectorAll ? node.querySelectorAll('input[type="password"]') : [];
-            passwordFields.forEach(field => {
-              field.addEventListener('input', (event) => {
-                this.analyzePasswordStrength(event.target.value);
-              });
-            });
-          }
+    fastMonitorPasswordFields() {
+        // Fast initial check
+        this.fastCheckPasswordFields();
+        
+        // Efficient mutation observer
+        const observer = new MutationObserver((mutations) => {
+            for (const mutation of mutations) {
+                if (mutation.addedNodes.length > 0) {
+                    this.fastCheckPasswordFields();
+                    break;
+                }
+            }
         });
-      });
-    });
 
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-  }
-
-  analyzePasswordStrength(password) {
-    if (!password || password.length < 4) return;
-
-    const strength = this.calculatePasswordStrength(password);
-    
-    if (strength.strength === 'weak') {
-      this.reportWeakPassword(strength);
-    }
-  }
-
-  calculatePasswordStrength(password) {
-    let score = 0;
-    let feedback = [];
-
-    // Length check
-    if (password.length >= 12) score += 2;
-    else if (password.length >= 8) score += 1;
-    else feedback.push('Too short');
-
-    // Character variety
-    if (/[a-z]/.test(password)) score += 1;
-    if (/[A-Z]/.test(password)) score += 1;
-    if (/[0-9]/.test(password)) score += 1;
-    if (/[^a-zA-Z0-9]/.test(password)) score += 1;
-
-    // Weak pattern checks
-    const weakPatterns = [
-      /^[0-9]+$/, /^[a-zA-Z]+$/, /^(.)\1+$/, 
-      /password/i, /123456/, /qwerty/i, /admin/i,
-      /letmein/i, /welcome/i, /12345678/, /123456789/
-    ];
-    
-    const isWeak = weakPatterns.some(pattern => pattern.test(password));
-    if (isWeak) {
-      score = Math.max(0, score - 2);
-      feedback.push('Common pattern detected');
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            childList: true
+        });
     }
 
-    // Determine strength
-    let strength = 'weak';
-    if (score >= 5) strength = 'strong';
-    else if (score >= 3) strength = 'medium';
+    fastCheckPasswordFields() {
+        const passwordFields = document.querySelectorAll('input[type="password"]');
+        
+        for (const field of passwordFields) {
+            if (!field.hasAttribute('data-cyberpet-monitored')) {
+                field.setAttribute('data-cyberpet-monitored', 'true');
+                
+                // Fast event listeners
+                field.addEventListener('input', this.debounce((event) => {
+                    this.fastAnalyzePassword(event.target.value);
+                }, 300));
+                
+                field.addEventListener('blur', (event) => {
+                    if (event.target.value) {
+                        this.fastAnalyzePassword(event.target.value);
+                    }
+                });
+            }
+        }
+    }
 
-    return { strength, score, feedback };
-  }
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
 
-  // In content.js - fix the message sending
-  reportWeakPassword(strengthInfo) {
-    const threat = {
-      type: 'weak_password',
-      message: 'Weak password detected on page',
-      severity: 'warning',
-      strength: strengthInfo.strength,
-      feedback: strengthInfo.feedback,
-      url: window.location.href,
-      timestamp: new Date().toISOString()
-    };
+    fastAnalyzePassword(password) {
+        if (!password || password.length < 4) return;
 
-    // Send to background script
-    chrome.runtime.sendMessage({
-      action: 'reportThreat',
-      threat: threat
-    });
+        const strength = this.quickPasswordCheck(password);
+        
+        if (strength === 'weak') {
+            this.fastReportWeakPassword(password.length);
+        }
+    }
 
-    console.log('🚨 Weak password detected:', strengthInfo);
-  }
+    quickPasswordCheck(password) {
+        // Ultra-fast password check
+        if (password.length < 8) return 'weak';
+        
+        const weakPatterns = [
+            'password', '123456', 'qwerty', 'admin', 'welcome'
+        ];
+        
+        const lowerPass = password.toLowerCase();
+        if (weakPatterns.some(pattern => lowerPass.includes(pattern))) {
+            return 'weak';
+        }
+        
+        return 'adequate';
+    }
+
+    fastReportWeakPassword(length) {
+        const threat = {
+            type: 'weak_password',
+            message: `Weak password detected (only ${length} characters)`,
+            severity: 'warning',
+            url: window.location.href,
+            timestamp: new Date().toISOString(),
+            source: 'Fast Password Check'
+        };
+
+        // Non-blocking threat report
+        chrome.runtime.sendMessage({
+            action: 'reportThreat',
+            threat: threat
+        });
+    }
+
+    immediateSecurityCheck() {
+        // Fast HTTP check
+        if (window.location.protocol === 'http:' && 
+            !window.location.hostname.includes('localhost') && 
+            !window.location.hostname.includes('127.0.0.1')) {
+            
+            chrome.runtime.sendMessage({
+                action: 'reportThreat',
+                threat: {
+                    type: 'insecure_connection',
+                    message: `Unencrypted HTTP connection to ${window.location.hostname}`,
+                    severity: 'warning',
+                    url: window.location.href,
+                    timestamp: new Date().toISOString(),
+                    source: 'Immediate Protocol Check'
+                }
+            });
+        }
+
+        // Quick mixed content check
+        this.fastMixedContentCheck();
+    }
+
+    fastMixedContentCheck() {
+        const elements = document.querySelectorAll('script[src^="http://"], iframe[src^="http://"]');
+        if (elements.length > 0 && window.location.protocol === 'https:') {
+            chrome.runtime.sendMessage({
+                action: 'reportThreat',
+                threat: {
+                    type: 'mixed_content',
+                    message: 'Mixed content: HTTP resources on HTTPS page',
+                    severity: 'warning',
+                    url: window.location.href,
+                    timestamp: new Date().toISOString(),
+                    source: 'Content Security'
+                }
+            });
+        }
+    }
 }
 
-// Check for HTTP site
-if (window.location.protocol === 'http:' && !window.location.hostname.includes('localhost')) {
-  chrome.runtime.sendMessage({
-    action: 'reportThreat',
-    threat: {
-      type: 'insecure_connection',
-      message: `HTTP site: ${window.location.hostname}`,
-      severity: 'warning',
-      url: window.location.href,
-      timestamp: new Date().toISOString()
-    }
-  });
+// Fast initialization
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        new OptimizedPageSecurityMonitor();
+    });
+} else {
+    new OptimizedPageSecurityMonitor();
 }
-
-// Initialize password monitoring
-const passwordMonitor = new PasswordMonitor();

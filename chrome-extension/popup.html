@@ -1,11 +1,9 @@
-<!--BostonHacks/chrome-extension/popup.html--> 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberPet</title>
+    <title>FrostByte</title>
     <style>
         * {
             margin: 0;
@@ -23,9 +21,9 @@
             background: -o-linear-gradient(135deg, #0a192f 0%, #1e3a5f 100%);
             background: linear-gradient(135deg, #0a192f 0%, #1e3a5f 100%);
             color: #e6f1ff;
-            width: 400px;
-            height: 600px;
-            padding: 15px;
+            width: 440px;
+            height: 820px;
+            padding: 12px;
             overflow: hidden;
         }
         
@@ -40,231 +38,508 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 0 15px 0;
+            padding: 0 0 12px 0;
             border-bottom: 1px solid #3a506b;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             flex-shrink: 0;
         }
         
         .logo {
             display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+        }
+        
+        .logo-main {
+            display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
         
         .logo-icon {
             width: 32px;
             height: 32px;
             background: url('assets/outline-icon.png') center/contain no-repeat;
+            filter: drop-shadow(0 0 8px rgba(123, 104, 238, 0.6));
         }
         
         .logo-text {
             font-size: 18px;
             font-weight: 700;
-            background: linear-gradient(90deg, #64ffda, #57cbff, #9d4edd);
+            background: linear-gradient(90deg, #7b68ee, #9370db, #8a2be2);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(123, 104, 238, 0.3);
         }
         
         .tagline {
-            font-size: 11px;
-            color: #a8b2d1;
+            font-size: 10px;
+            color: #b19cd9;
+            margin-left: 40px;
+            font-style: italic;
+        }
+
+        .protection-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #7b68ee;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: #7b68ee;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 0 6px rgba(123, 104, 238, 0.8);
         }
         
         .dashboard {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
             flex: 1;
             overflow-y: auto;
-            padding-right: 12px; /* More padding for scrollbar */
-            margin-right: -8px; /* Pull content left */
+            padding-right: 4px;
         }
 
         .dashboard::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
 
         .dashboard::-webkit-scrollbar-track {
             background: rgba(58, 80, 107, 0.3);
-            border-radius: 10px;
-            margin: 8px 0;
-            border: 1px solid rgba(87, 203, 255, 0.1);
+            border-radius: 8px;
+            margin: 6px 0;
         }
 
         .dashboard::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #57cbff, #9d4edd, #64ffda);
-            border-radius: 10px;
-            border: 1px solid rgba(87, 203, 255, 0.3);
-            box-shadow: 0 2px 8px rgba(87, 203, 255, 0.2);
+            background: #7b68ee;
+            border-radius: 8px;
         }
 
         .dashboard::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #64ffda, #57cbff, #c77dff);
-            box-shadow: 0 2px 12px rgba(87, 203, 255, 0.4);
+            background: #9370db;
         }
         
         .pet-section {
-            background: rgba(30, 58, 95, 0.8);
-            border-radius: 16px;
-            padding: 18px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, rgba(30, 58, 95, 0.9), rgba(42, 67, 101, 0.8));
+            border-radius: 14px;
+            padding: 16px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             display: flex;
             flex-direction: column;
             align-items: center;
-            border: 1px solid #3a506b;
-            background: linear-gradient(135deg, rgba(30, 58, 95, 0.9), rgba(42, 67, 101, 0.8));
+            border: 1px solid #7b68ee;
+            min-height: 260px;
+            will-change: transform;
+            contain: layout style paint;
+            position: relative;
         }
         
         .pet-container {
             position: relative;
-            width: 140px;
-            height: 140px;
-            margin: 10px 0;
+            width: 220px !important;
+            height: 220px !important;
+            margin: 4px 0 !important;
         }
         
-        .cyber-pet-static {
+        .cyber-pet {
             width: 100%;
             height: 100%;
             background: url('assets/bgicon.png') center/contain no-repeat;
-            border-radius: 12px;
-            filter: drop-shadow(0 4px 12px rgba(87, 203, 255, 0.2));
+            border-radius: 10px;
+            filter: drop-shadow(0 2px 12px rgba(123, 104, 238, 0.6));
+            transform: scale(1);
+            transition: all 0.3s ease;
+        }
+
+        .cyber-pet:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 4px 16px rgba(123, 104, 238, 0.8));
+        }
+
+        .cyber-pet.tired {
+            background: url('assets/kinda-tired.png') center/contain no-repeat;
+            filter: drop-shadow(0 2px 12px rgba(255, 183, 77, 0.4));
+        }
+
+        .cyber-pet.very-tired {
+            background: url('assets/very-tired.png') center/contain no-repeat;
+            filter: drop-shadow(0 2px 12px rgba(255, 107, 107, 0.4));
+            animation: pulse-tired 2s infinite;
+        }
+
+        @keyframes pulse-tired {
+            0%, 100% { 
+                opacity: 1;
+                filter: drop-shadow(0 2px 12px rgba(255, 107, 107, 0.4));
+            }
+            50% { 
+                opacity: 0.8;
+                filter: drop-shadow(0 2px 16px rgba(255, 107, 107, 0.6));
+            }
         }
         
         .pet-name {
-            font-size: 18px;
+            font-size: 22px !important;
             font-weight: 700;
-            margin: 8px 0 3px 0;
-            color: #57cbff;
-            text-shadow: 0 2px 4px rgba(87, 203, 255, 0.3);
+            margin: 4px 0 8px 0 !important;
+            background: linear-gradient(90deg, #7b68ee, #9370db, #8a2be2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(123, 104, 238, 0.5);
         }
         
         .pet-status {
-            color: #9d4edd;
+            color: #7b68ee;
             font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 13px;
+            margin-bottom: 12px !important;
+            font-size: 13px !important;
+            text-align: center;
+            min-height: 16px;
+        }
+
+        .health-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 85%;
+            justify-content: center;
+            position: relative;
         }
         
         .health-bar {
-            width: 100%;
+            flex: 1;
             height: 10px;
             background: rgba(58, 80, 107, 0.6);
-            border-radius: 8px;
-            margin: 8px 0;
+            border-radius: 5px;
+            margin: 4px 0;
             overflow: hidden;
-            border: 1px solid #3a506b;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+            border: 1px solid #7b68ee;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
         }
         
         .health-fill {
             height: 100%;
-            width: 100%;
-            background: linear-gradient(90deg, #64ffda, #57cbff, #9d4edd);
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(87, 203, 255, 0.4);
+            width: 85%;
+            background: linear-gradient(90deg, #7b68ee, #9370db, #8a2be2);
+            border-radius: 5px;
+            box-shadow: 0 0 8px rgba(123, 104, 238, 0.6);
+            transition: width 0.5s ease;
         }
         
         .health-text {
-            font-size: 11px;
-            color: #a8b2d1;
+            font-size: 10px;
+            color: #b19cd9;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .hp-change {
+            position: absolute;
+            right: -30px;
+            font-size: 12px;
+            font-weight: bold;
+            animation: floatUp 1s ease-out;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .hp-positive { 
+            color: #7b68ee;
+            text-shadow: 0 1px 2px rgba(123, 104, 238, 0.5);
+        }
+        
+        .hp-negative { 
+            color: #ff6b6b;
+            text-shadow: 0 1px 2px rgba(255, 107, 107, 0.3);
+        }
+
+        @keyframes floatUp {
+            0% { 
+                transform: translateY(0) scale(1); 
+                opacity: 1; 
+            }
+            100% { 
+                transform: translateY(-20px) scale(0.8); 
+                opacity: 0; 
+            }
         }
         
         .security-section {
             background: linear-gradient(135deg, rgba(30, 58, 95, 0.9), rgba(42, 67, 101, 0.8));
-            border-radius: 16px;
+            border-radius: 14px;
             padding: 18px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-            border: 1px solid #3a506b;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border: 1px solid #7b68ee;
+            will-change: transform;
+            contain: layout style paint;
         }
         
         .security-title {
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
         }
         
         .security-title h2 {
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 600;
             color: #e6f1ff;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
         }
         
         .security-icon {
             width: 22px;
             height: 22px;
             background: url('assets/shield.png') center/contain no-repeat;
-            filter: drop-shadow(0 2px 4px rgba(87, 203, 255, 0.3));
+            filter: drop-shadow(0 1px 3px rgba(123, 104, 238, 0.5));
         }
         
         .security-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 16px;
             margin-bottom: 18px;
         }
         
         .security-item {
             background: linear-gradient(135deg, rgba(58, 80, 107, 0.7), rgba(42, 67, 101, 0.8));
-            border-radius: 12px;
-            padding: 14px;
+            border-radius: 10px;
+            padding: 16px;
             text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid #4a6285;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.15s ease !important;
+            border: 1px solid #7b68ee;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
             position: relative;
             overflow: hidden;
-        }
-        
-        .security-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(87, 203, 255, 0.1), transparent);
-            transition: left 0.5s ease;
-        }
-        
-        .security-item:hover::before {
-            left: 100%;
+            will-change: transform;
+            contain: layout style paint;
+            cursor: pointer;
+            margin: 2px;
         }
         
         .security-item:hover {
-            border-color: #57cbff;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(87, 203, 255, 0.3);
-            background: linear-gradient(135deg, rgba(58, 80, 107, 0.8), rgba(42, 67, 101, 0.9));
+            border-color: #9370db;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(123, 104, 238, 0.3);
         }
         
         .security-value {
-            font-size: 14px;
+            font-size: 15px !important;
             font-weight: 700;
-            margin: 4px 0;
+            margin: 2px 0 1px 0 !important;
             color: #e6f1ff;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
         }
         
         .security-label {
-            font-size: 9px;
-            color: #a8b2d1;
+            font-size: 9px !important;
+            color: #b19cd9;
             font-weight: 600;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
             text-transform: uppercase;
         }
+
+        .security-subtext {
+            font-size: 8px !important;
+            color: #a8b2d1;
+            margin-top: 1px !important;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .security-item.safe {
+            border-color: #7b68ee;
+            box-shadow: 0 2px 8px rgba(123, 104, 238, 0.3);
+        }
+
+        .security-item.warning {
+            border-color: #ffb74d;
+            box-shadow: 0 2px 8px rgba(255, 183, 77, 0.2);
+        }
+
+        .security-item.danger {
+            border-color: #ff6b6b;
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.2);
+            animation: pulse-alert 1.5s infinite;
+        }
+
+        @keyframes pulse-alert {
+            0%, 100% { 
+                border-color: #ff6b6b;
+                box-shadow: 0 2px 8px rgba(255, 107, 107, 0.2);
+            }
+            50% { 
+                border-color: #ff8e8e;
+                box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+            }
+        }
+
+        .activity-section {
+            background: linear-gradient(135deg, rgba(30, 58, 95, 0.9), rgba(42, 67, 101, 0.8));
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border: 1px solid #7b68ee;
+            will-change: transform;
+            contain: layout style paint;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 420px;
+        }
         
-        .threat-list {
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+        
+        .activity-header h2 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #e6f1ff;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .monitor-icon {
+            width: 20px;
+            height: 20px;
+            background: url('assets/monitor.png') center/contain no-repeat;
+            filter: drop-shadow(0 1px 2px rgba(123, 104, 238, 0.5));
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #7b68ee, #9370db, #8a2be2);
+            color: #ffffff !important;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease !important;
+            border: 1px solid rgba(123, 104, 238, 0.7);
+            box-shadow: 0 2px 8px rgba(123, 104, 238, 0.3);
+            position: relative;
+            overflow: hidden;
+            will-change: transform;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(123, 104, 238, 0.5);
+            background: linear-gradient(135deg, #9370db, #8a2be2, #7b68ee);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 6px rgba(123, 104, 238, 0.3);
+        }
+        
+        .btn.scanning {
+            background: linear-gradient(135deg, #7b68ee, #9370db, #ff6b6b) !important;
+            animation: scan-pulse 0.5s infinite;
+        }
+
+        @keyframes scan-pulse {
+            0%, 100% { 
+                transform: translateY(-1px) scale(1);
+                box-shadow: 0 2px 8px rgba(123, 104, 238, 0.3);
+            }
+            50% { 
+                transform: translateY(-1px) scale(1.02);
+                box-shadow: 0 3px 10px rgba(255, 107, 107, 0.4);
+            }
+        }
+        
+        .threat-feed {
             background: rgba(42, 67, 101, 0.6);
-            border-radius: 12px;
-            padding: 12px;
-            max-height: 120px;
+            border-radius: 10px;
+            padding: 14px;
+            border: 1px solid #7b68ee;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 340px;
+        }
+
+        .threat-feed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #e6f1ff;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: #7b68ee;
+            transition: all 0.2s ease;
+        }
+
+        .status-indicator.active {
+            color: #7b68ee;
+        }
+
+        .status-indicator.inactive {
+            color: #a8b2d1;
+        }
+
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            background: #7b68ee;
+            border-radius: 50%;
+            animation: pulse 1s infinite !important;
+            box-shadow: 0 0 6px rgba(123, 104, 238, 0.8);
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.6;
+                transform: scale(1.1);
+            }
+        }
+
+        .threat-list {
+            max-height: none !important;
+            height: 300px !important;
             overflow-y: auto;
-            border: 1px solid #4a6285;
-            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+            border: 1px solid #7b68ee;
+            box-shadow: inset 0 1px 6px rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            padding: 10px;
+            transition: all 0.2s ease;
+            will-change: transform;
+            contain: layout style paint;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .threat-list::-webkit-scrollbar {
@@ -272,36 +547,44 @@
         }
 
         .threat-list::-webkit-scrollbar-track {
-            background: rgba(58, 80, 107, 0.3);
-            border-radius: 8px;
-            margin: 4px 0;
+            background: rgba(58, 80, 107, 0.2);
+            border-radius: 6px;
+            margin: 2px 0;
         }
 
         .threat-list::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #57cbff, #9d4edd);
-            border-radius: 8px;
+            background: #7b68ee;
+            border-radius: 6px;
+        }
+
+        .threat-list::-webkit-scrollbar-thumb:hover {
+            background: #9370db;
         }
         
         .threat-item {
             display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 12px 10px;
             font-size: 11px;
-            border-bottom: 1px solid #4a6285;
-            transition: all 0.2s ease;
-            border-radius: 6px;
-            margin-bottom: 4px;
+            border-bottom: 1px solid #7b68ee;
+            transition: all 0.1s ease !important;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            will-change: transform;
+            cursor: pointer;
+            flex-shrink: 0;
+            min-height: 40px;
         }
-        
-        .threat-item:hover {
-            background: rgba(87, 203, 255, 0.1);
-            transform: translateX(4px);
-        }
-        
+
         .threat-item:last-child {
             border-bottom: none;
             margin-bottom: 0;
+        }
+        
+        .threat-item:hover {
+            background: rgba(123, 104, 238, 0.15);
+            transform: translateX(2px);
         }
         
         .threat-icon {
@@ -309,126 +592,327 @@
             height: 16px;
             background: url('assets/check-icon.png') center/contain no-repeat;
             filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+            flex-shrink: 0;
+            margin-top: 1px;
+            transition: all 0.2s ease;
+        }
+        
+        .threat-icon.safe {
+            background: url('assets/check-icon.png') center/contain no-repeat;
+            filter: drop-shadow(0 1px 2px rgba(123, 104, 238, 0.5));
         }
         
         .threat-icon.warning {
             background: url('assets/warning-icon.png') center/contain no-repeat;
+            filter: drop-shadow(0 1px 2px rgba(255, 183, 77, 0.3));
         }
         
         .threat-icon.danger {
             background: url('assets/danger-icon.png') center/contain no-repeat;
+            filter: drop-shadow(0 1px 2px rgba(255, 107, 107, 0.3));
+            animation: pulse 1.5s infinite;
+        }
+
+        .threat-content {
+            flex: 1;
+            min-width: 0;
         }
         
         .threat-text {
             color: #e6f1ff;
-            flex: 1;
-            font-size: 11px;
+            font-size: 11px !important;
+            line-height: 1.3;
+            transition: all 0.2s ease;
+            margin-bottom: 2px;
         }
-        
-        .threat-time {
-            color: #a8b2d1;
-            font-size: 9px;
-            font-style: italic;
-        }
-        
-        .activity-section {
-            background: linear-gradient(135deg, rgba(30, 58, 95, 0.9), rgba(42, 67, 101, 0.8));
-            border-radius: 16px;
-            padding: 18px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-            border: 1px solid #3a506b;
-        }
-        
-        .activity-header {
+
+        .threat-details {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            font-size: 9px !important;
+            color: #8892b0;
         }
-        
-        .activity-header h2 {
-            font-size: 16px;
+
+        .threat-source {
             font-weight: 600;
-            color: #e6f1ff;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            color: #7b68ee;
         }
-        
-        .btn {
-            background: linear-gradient(135deg, #57cbff, #9d4edd, #64ffda);
-            color: #0a192f;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-weight: 700;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(87, 203, 255, 0.5);
-            box-shadow: 0 4px 15px rgba(87, 203, 255, 0.3);
-            position: relative;
+
+        .threat-url {
+            color: #b19cd9;
+            max-width: 140px;
             overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
-        
-        .btn::before {
-            content: '';
-            position: absolute;
+
+        .threat-time {
+            color: #8892b0;
+            font-size: 8px !important;
+        }
+
+        .threat-modal, .trackers-modal {
+            display: none;
+            position: fixed;
             top: 0;
-            left: -100%;
+            left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s ease;
-        }
-        
-        .btn:hover::before {
-            left: 100%;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(87, 203, 255, 0.5);
-            background: linear-gradient(135deg, #64ffda, #57cbff, #c77dff);
-        }
-        
-        .btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 10px rgba(87, 203, 255, 0.4);
-        }
-        
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: 0 2px 8px rgba(87, 203, 255, 0.2);
-        }
-        
-        .activity-content {
-            background: rgba(42, 67, 101, 0.6);
-            border-radius: 12px;
-            padding: 18px;
-            min-height: 80px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            background: rgba(10, 25, 47, 0.95);
+            z-index: 1000;
             align-items: center;
-            border: 1px solid #4a6285;
-            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+            justify-content: center;
+            padding: 20px;
         }
-        
-        .activity-icon {
-            width: 28px;
-            height: 28px;
-            background: url('assets/check-icon.png') center/contain no-repeat;
-            margin-bottom: 10px;
-            filter: drop-shadow(0 2px 4px rgba(87, 203, 255, 0.3));
+
+        .threat-modal-content, .trackers-modal-content {
+            background: linear-gradient(135deg, rgba(30, 58, 95, 0.95), rgba(42, 67, 101, 0.95));
+            border-radius: 14px;
+            padding: 20px;
+            border: 2px solid #7b68ee;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            max-width: 360px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
         }
-        
-        .activity-text {
-            text-align: center;
+
+        .threat-modal-content::-webkit-scrollbar,
+        .trackers-modal-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .threat-modal-content::-webkit-scrollbar-track,
+        .trackers-modal-content::-webkit-scrollbar-track {
+            background: rgba(58, 80, 107, 0.2);
+            border-radius: 6px;
+            margin: 2px 0;
+        }
+
+        .threat-modal-content::-webkit-scrollbar-thumb,
+        .trackers-modal-content::-webkit-scrollbar-thumb {
+            background: #7b68ee;
+            border-radius: 6px;
+        }
+
+        .threat-modal-content::-webkit-scrollbar-thumb:hover,
+        .trackers-modal-content::-webkit-scrollbar-thumb:hover {
+            background: #9370db;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .threat-modal-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #7b68ee;
+            padding-right: 30px;
+        }
+
+        .threat-modal-title {
+            font-size: 16px;
+            font-weight: 700;
             color: #e6f1ff;
-            font-size: 13px;
-            font-weight: 500;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .threat-modal-body {
+            font-size: 12px;
+            line-height: 1.4;
+            color: #a8b2d1;
+        }
+
+        .threat-info-item {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(58, 80, 107, 0.3);
+            border-radius: 6px;
+        }
+
+        .threat-info-label {
+            font-weight: 600;
+            color: #7b68ee;
+            font-size: 10px;
+            margin-bottom: 2px;
+        }
+
+        .threat-info-value {
+            color: #e6f1ff;
+            font-size: 11px;
+        }
+
+        .threat-explanation {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid #ff6b6b;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .threat-explanation h4 {
+            color: #ff6b6b;
+            margin-bottom: 5px;
+            font-size: 11px;
+        }
+
+        .trackers-list {
+            max-height: 180px;
+            overflow-y: auto;
+            margin: 12px 0;
+        }
+
+        .tracker-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 10px;
+            border-bottom: 1px solid #7b68ee;
+            font-size: 12px;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .tracker-item:last-child {
+            border-bottom: none;
+        }
+
+        .tracker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .tracker-name {
+            color: #e6f1ff;
+            font-weight: 600;
+        }
+
+        .tracker-status {
+            color: #7b68ee;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .tracker-url {
+            color: #b19cd9;
+            font-size: 10px;
+            font-style: italic;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* NEW: Password Security Styles */
+        .security-item.password-warning {
+            border-color: #ffb74d;
+            box-shadow: 0 2px 8px rgba(255, 183, 77, 0.3);
+            animation: pulse-warning 2s infinite;
+        }
+
+        .security-item.password-danger {
+            border-color: #ff6b6b;
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+            animation: pulse-alert 1.5s infinite;
+        }
+
+        @keyframes pulse-warning {
+            0%, 100% { 
+                border-color: #ffb74d;
+                box-shadow: 0 2px 8px rgba(255, 183, 77, 0.3);
+            }
+            50% { 
+                border-color: #ffcc80;
+                box-shadow: 0 2px 10px rgba(255, 183, 77, 0.4);
+            }
+        }
+
+        .password-modal-content {
+            background: linear-gradient(135deg, rgba(30, 58, 95, 0.95), rgba(42, 67, 101, 0.95));
+            border-radius: 14px;
+            padding: 20px;
+            border: 2px solid #ffb74d;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            max-width: 380px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .password-tips {
+            background: rgba(255, 183, 77, 0.1);
+            border: 1px solid #ffb74d;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+
+        .password-tips h4 {
+            color: #ffb74d;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+
+        .password-tips ul {
+            margin: 0;
+            padding-left: 16px;
+            font-size: 11px;
+            color: #e6f1ff;
+        }
+
+        .password-tips li {
+            margin-bottom: 4px;
+        }
+
+        @media (max-height: 800px) {
+            body {
+                height: 750px;
+                padding: 10px;
+            }
+            
+            .pet-section {
+                min-height: 240px;
+                padding: 14px !important;
+            }
+            
+            .pet-container {
+                width: 200px !important;
+                height: 200px !important;
+            }
+            
+            .dashboard {
+                gap: 10px;
+            }
+            
+            .threat-list {
+                height: 280px !important;
+            }
+            
+            .activity-section {
+                min-height: 380px;
+            }
         }
     </style>
 </head>
@@ -436,267 +920,166 @@
     <div class="container">
         <header>
             <div class="logo">
-                <div class="logo-icon"></div>
-                <div class="logo-text">CyberPet</div>
+                <div class="logo-main">
+                    <div class="logo-icon"></div>
+                    <div class="logo-text">FrostByte</div>
+                </div>
+                <div class="tagline">Your Cyber Companion</div>
             </div>
-            <div class="tagline">Your AI Security Companion</div>
+            <div class="protection-status">
+                <div class="status-dot"></div>
+                <span>ACTIVE</span>
+            </div>
         </header>
         
         <div class="dashboard">
             <div class="pet-section">
                 <div class="pet-container">
-                    <div class="cyber-pet-static"></div>
+                    <div class="cyber-pet" id="cyberPet"></div>
                 </div>
                 <div class="pet-name">Byte</div>
-                <div class="pet-status" id="petStatus">Monitoring your security...</div>
-                <div class="health-bar">
-                    <div class="health-fill"></div>
+                <div class="pet-status" id="petStatus">All systems operational</div>
+                <div class="health-container">
+                    <div class="health-bar">
+                        <div class="health-fill" id="healthFill" style="width: 85%"></div>
+                    </div>
+                    <div class="health-text" id="healthText">85 / 100 HP</div>
+                    <div class="hp-change" id="hpChange" style="display: none;"></div>
                 </div>
-                <div class="health-text">100 / 100 HP</div>
             </div>
             
             <div class="security-section">
                 <div class="security-title">
                     <div class="security-icon"></div>
-                    <h2>Security Status</h2>
-                </div>
-                <div class="security-grid">
-                    <div class="security-item" id="phishingItem">
-                        <div class="security-value" id="phishingValue">Safe</div>
-                        <div class="security-label">PHISHING PROTECTION</div>
-                    </div>
-                    <div class="security-item" id="passwordItem">
-                        <div class="security-value" id="passwordValue">Strong</div>
-                        <div class="security-label">PASSWORD STRENGTH</div>
-                    </div>
-                    <div class="security-item" id="threatItem">
-                        <div class="security-value" id="threatValue">0</div>
-                        <div class="security-label">ACTIVE THREATS</div>
-                    </div>
-                    <div class="security-item" id="privacyItem">
-                        <div class="security-value" id="privacyValue">Protected</div>
-                        <div class="security-label">PRIVACY GUARD</div>
-                    </div>
+                    <h2>Real-Time Protection</h2>
                 </div>
                 
-                <div class="threat-list" id="threatList">
-                    <div class="threat-item">
-                        <div class="threat-icon"></div>
-                        <div class="threat-text">No threats detected</div>
-                        <div class="threat-time">Just now</div>
+                <div class="security-grid">
+                    <div class="security-item safe" id="pageSafetyItem">
+                        <div class="security-value" id="pageSafetyValue">Safe</div>
+                        <div class="security-label">CURRENT PAGE</div>
+                        <div class="security-subtext" id="pageSafetySubtext">Loading website...</div>
+                    </div>
+                    
+                    <div class="security-item safe" id="activeThreatsItem">
+                        <div class="security-value" id="activeThreatsValue">0</div>
+                        <div class="security-label">ACTIVE THREATS</div>
+                        <div class="security-subtext">Last 5 minutes</div>
+                    </div>
+                    
+                    <div class="security-item safe" id="systemGuardItem">
+                        <div class="security-value" id="systemGuardValue">8</div>
+                        <div class="security-label">TRACKERS BLOCKED</div>
+                        <div class="security-subtext" id="systemGuardSubtext">Click for details</div>
+                    </div>
+                    
+                    <!-- NEW: Password Security Item -->
+                    <div class="security-item safe" id="passwordSecurityItem">
+                        <div class="security-value" id="passwordSecurityValue">0</div>
+                        <div class="security-label">WEAK PASSWORDS</div>
+                        <div class="security-subtext" id="passwordSecuritySubtext">No weak passwords detected</div>
                     </div>
                 </div>
             </div>
             
             <div class="activity-section">
                 <div class="activity-header">
-                    <h2>Security Actions</h2>
-                    <button class="btn" id="scanBtn">Deep Scan</button>
+                    <h2>
+                        <div class="monitor-icon"></div>
+                        Security Monitor
+                    </h2>
+                    <button class="btn" id="scanBtn">Fast Scan</button>
                 </div>
-                <div class="activity-content">
-                    <div class="activity-icon"></div>
-                    <div class="activity-text" id="activityText">System secure. No immediate threats.</div>
+                
+                <div class="threat-feed">
+                    <div class="threat-feed-header">
+                        <span>Event Log</span>
+                        <div class="status-indicator active" id="statusIndicator">
+                            <div class="pulse-dot"></div>
+                            <span>Live</span>
+                        </div>
+                    </div>
+                    <div class="threat-list" id="threatList">
+                        <div class="threat-item">
+                            <div class="threat-icon safe"></div>
+                            <div class="threat-content">
+                                <div class="threat-text">Monitoring browser activity</div>
+                                <div class="threat-details">
+                                    <span class="threat-source">System</span>
+                                    <span class="threat-url">frostbyte.app</span>
+                                    <span class="threat-time">Just now</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // Security Configuration - Updated to work with background service worker
-        const securityManager = {
-            threats: [],
-            
-            async loadThreats() {
-                try {
-                    // Get threats from background service worker
-                    const result = await chrome.runtime.sendMessage({ action: 'getThreats' });
-                    this.threats = result.threats || [];
-                    return this.threats;
-                } catch (error) {
-                    console.error('Failed to load threats from background:', error);
-                    return [];
-                }
-            },
+    <div class="threat-modal" id="threatModal">
+        <div class="threat-modal-content">
+            <button class="modal-close-btn" id="modalClose">×</button>
+            <div class="threat-modal-header">
+                <div class="threat-icon danger" id="modalThreatIcon"></div>
+                <div class="threat-modal-title" id="modalThreatTitle">Threat Details</div>
+            </div>
+            <div class="threat-modal-body">
+            </div>
+        </div>
+    </div>
 
-            async performScan() {
-                try {
-                    // Trigger manual scan in background
-                    const response = await chrome.runtime.sendMessage({ action: 'manualScan' });
-                    // Reload threats after scan
-                    await this.loadThreats();
-                    return { success: true };
-                } catch (error) {
-                    console.error('Manual scan failed:', error);
-                    return { success: false, error: error.message };
-                }
-            },
+    <div class="trackers-modal" id="trackersModal">
+        <div class="trackers-modal-content">
+            <button class="modal-close-btn" id="trackersModalClose">×</button>
+            <div class="threat-modal-header">
+                <div class="threat-icon safe"></div>
+                <div class="threat-modal-title">Trackers & Ads Blocked</div>
+            </div>
+            <div class="threat-modal-body">
+                <div class="threat-info-item">
+                    <div class="threat-info-label">TOTAL BLOCKED</div>
+                    <div class="threat-info-value" id="totalTrackersBlocked">8 trackers</div>
+                </div>
+                <div class="trackers-list" id="trackersList">
+                </div>
+                <div class="threat-explanation" style="border-color: #7b68ee; background: rgba(123, 104, 238, 0.1);">
+                    <h4>PROTECTING YOUR PRIVACY</h4>
+                    <div>FrostByte automatically blocks tracking scripts and ads that monitor your browsing activity. This prevents companies from collecting your personal data without permission.</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            // Check current page status
-            async getCurrentPageStatus() {
-                try {
-                    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-                    if (!tab?.url) return { isSafe: true };
-                    
-                    // Check if current URL is in threats
-                    const currentThreat = this.threats.find(threat => 
-                        threat.url === tab.url && threat.severity === 'danger'
-                    );
-                    
-                    return {
-                        isSafe: !currentThreat,
-                        url: tab.url,
-                        threat: currentThreat
-                    };
-                } catch (error) {
-                    console.error('Error getting page status:', error);
-                    return { isSafe: true };
-                }
-            }
-        };
+    <!-- NEW: Password Security Modal -->
+    <div class="threat-modal" id="passwordModal">
+        <div class="password-modal-content">
+            <button class="modal-close-btn" id="passwordModalClose">×</button>
+            <div class="threat-modal-header">
+                <div class="threat-icon warning"></div>
+                <div class="threat-modal-title">Password Security</div>
+            </div>
+            <div class="threat-modal-body">
+                <div class="threat-info-item">
+                    <div class="threat-info-label">WEAK PASSWORDS DETECTED</div>
+                    <div class="threat-info-value" id="totalWeakPasswords">0 passwords need attention</div>
+                </div>
+                <div class="trackers-list" id="weakPasswordsList">
+                </div>
+                <div class="password-tips">
+                    <h4>PASSWORD SECURITY TIPS</h4>
+                    <ul>
+                        <li>Use at least 12 characters with mix of letters, numbers & symbols</li>
+                        <li>Avoid common words, phrases, or personal information</li>
+                        <li>Use unique passwords for different accounts</li>
+                        <li>Consider using a password manager</li>
+                        <li>Enable two-factor authentication when available</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // DOM Elements
-        const petStatus = document.getElementById('petStatus');
-        const scanBtn = document.getElementById('scanBtn');
-        const activityIcon = document.querySelector('.activity-icon');
-        const activityText = document.getElementById('activityText');
-        const threatList = document.getElementById('threatList');
-        
-        // Security UI elements
-        const phishingValue = document.getElementById('phishingValue');
-        const passwordValue = document.getElementById('passwordValue');
-        const threatValue = document.getElementById('threatValue');
-        const privacyValue = document.getElementById('privacyValue');
-
-        // Update security UI with real-time data
-        async function updateSecurityUI() {
-            await securityManager.loadThreats();
-            
-            // Update threat count
-            const activeThreats = securityManager.threats.filter(t => t.severity === 'danger').length;
-            threatValue.textContent = activeThreats;
-            
-            // Update current page status
-            const pageStatus = await securityManager.getCurrentPageStatus();
-            phishingValue.textContent = pageStatus.isSafe ? 'Safe' : 'Danger';
-            
-            // Update threat list
-            updateThreatList();
-            
-            // Update overall status
-            updateOverallStatus(activeThreats, pageStatus.isSafe);
-        }
-
-        // Update threat list display
-        function updateThreatList() {
-            threatList.innerHTML = '';
-            
-            if (securityManager.threats.length === 0) {
-                threatList.innerHTML = `
-                    <div class="threat-item">
-                        <div class="threat-icon"></div>
-                        <div class="threat-text">No threats detected</div>
-                        <div class="threat-time">Just now</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Show latest 5 threats
-            const recentThreats = securityManager.threats.slice(0, 5);
-            
-            recentThreats.forEach(threat => {
-                const threatElement = document.createElement('div');
-                threatElement.className = 'threat-item';
-                
-                let iconClass = '';
-                if (threat.severity === 'danger') {
-                    iconClass = 'danger';
-                } else if (threat.severity === 'warning') {
-                    iconClass = 'warning';
-                }
-                
-                const time = new Date(threat.timestamp).toLocaleTimeString();
-                
-                threatElement.innerHTML = `
-                    <div class="threat-icon ${iconClass}"></div>
-                    <div class="threat-text">${threat.message}</div>
-                    <div class="threat-time">${time}</div>
-                `;
-                threatList.appendChild(threatElement);
-            });
-        }
-
-        // Update overall status display
-        function updateOverallStatus(threatCount, isCurrentPageSafe) {
-            if (threatCount > 0) {
-                petStatus.textContent = `${threatCount} active threat(s) detected`;
-                petStatus.style.color = '#ff6b6b';
-            } else if (!isCurrentPageSafe) {
-                petStatus.textContent = 'Current page has security issues';
-                petStatus.style.color = '#ffd700';
-            } else {
-                petStatus.textContent = 'All systems secure';
-                petStatus.style.color = '#9d4edd';
-            }
-        }
-
-        // Enhanced security scan
-        async function performSecurityScan() {
-            activityIcon.style.backgroundImage = "url('assets/check-icon.png')";
-            activityText.textContent = 'Scanning for threats...';
-            scanBtn.disabled = true;
-            petStatus.textContent = 'Scanning security...';
-            
-            try {
-                const result = await securityManager.performScan();
-                
-                if (result.success) {
-                    const dangerCount = securityManager.threats.filter(t => t.severity === 'danger').length;
-                    
-                    if (dangerCount > 0) {
-                        activityIcon.style.backgroundImage = "url('assets/danger-icon.png')";
-                        activityText.textContent = `${dangerCount} threats detected!`;
-                    } else {
-                        activityIcon.style.backgroundImage = "url('assets/check-icon.png')";
-                        activityText.textContent = 'No immediate threats found';
-                    }
-                } else {
-                    throw new Error(result.error);
-                }
-                
-            } catch (error) {
-                console.error('Scan failed:', error);
-                activityIcon.style.backgroundImage = "url('assets/warning-icon.png')";
-                activityText.textContent = 'Scan failed. Please try again.';
-                petStatus.textContent = 'Scan error occurred';
-            }
-            
-            await updateSecurityUI();
-            scanBtn.disabled = false;
-        }
-
-        // Event listener for scan button
-        scanBtn.addEventListener('click', performSecurityScan);
-
-        // Password strength checker (for demonstration)
-        function demoPasswordCheck() {
-            passwordValue.textContent = 'Strong';
-        }
-
-        // Initialize and auto-update
-        async function initialize() {
-            demoPasswordCheck();
-            await updateSecurityUI();
-            
-            // Auto-update every 3 seconds for real-time monitoring
-            setInterval(updateSecurityUI, 3000);
-            
-            // Perform initial scan
-            setTimeout(performSecurityScan, 1000);
-        }
-
-        // Start the application
-        initialize();
-    </script>
+    <script src="popup.js"></script>
 </body>
 </html>
