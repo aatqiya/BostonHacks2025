@@ -16,4 +16,32 @@ npx babel src --out-dir dist --extensions .jsx,.js --watch
 
 Terminal 4 - Electron App:
 bashcd desktop-app
-npm start
+<!-- npm start
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>CyberPet</title>
+    <link rel="stylesheet" href="dist/components/index.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: transparent;
+        }
+
+        #root {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script src="dist/petRenderer.js"></script>
+</body>
+
+</html> -->

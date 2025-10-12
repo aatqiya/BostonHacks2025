@@ -90,24 +90,21 @@ export default function PetDisplay() {
   };
 
   const getPetAnimation = () => {
-    if (petState.state === 'critical' || petState.state === 'alert') {
-      return <img src="petimages/idlecyberpet.gif" />;
-    }
-    return <img src="petimages/idlecyberpet.gif" />;
+    // Always show the idlecyberpet.gif image
+    return <img src="./petimages/idlecyberpet.gif" alt="CyberPet" style={{ width: '100%', height: '100%' }} />;
   };
 
   return (
     <div className="w-full h-full flex items-center justify-center">
       <div
         onClick={handleClick}
-        className={`w-40 h-40 bg-white rounded-lg shadow-xl flex items-center justify-center cursor-pointer hover:scale-105 transition-transform ${getPetAnimation()}`}
+        className="w-40 h-40 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
         style={{
-          border: isConnected ? '3px solid #00ff00' : '3px solid #ff0000'
+          background: 'transparent',
+          boxShadow: 'none'
         }}
       >
-        <div className="text-6xl select-none">
-          {petState.state === 'alert' || petState.state === 'critical' ? '😱' : '💔'}
-        </div>
+        {getPetAnimation()}
       </div>
     </div>
   );
