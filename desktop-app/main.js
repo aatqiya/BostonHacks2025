@@ -1,10 +1,14 @@
-// desktop-app/main.js - CLICKABLE PET + MANUAL/AUTO POPUP
+// desktop-app/main.js - FIXED VERSION
+
+// desktop-app/main.js - WITH DEBUG LOGGING
 
 const { app, BrowserWindow, screen, ipcMain } = require('electron');
 const path = require('path');
 
 let petWindow;
 let popupWindow = null;
+let conversationWindow = null;
+let currentThreatData = null;
 
 function createPetWindow() {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -17,7 +21,7 @@ function createPetWindow() {
 
         frame: false,
         transparent: true,
-        backgroundColor: '#00000000', // Explicitly set transparent background
+        backgroundColor: '#00000000',
         alwaysOnTop: true,
         resizable: false,
         skipTaskbar: true,
@@ -35,11 +39,8 @@ function createPetWindow() {
         petWindow = null;
     });
 
-    // Try to make the pet float above everything (including fullscreen) on macOS.
     try {
-        // 'screen-saver' is the highest level and commonly keeps the window above fullscreen apps.
         petWindow.setAlwaysOnTop(true, 'screen-saver');
-        // Make visible on all workspaces (spaces and full screen) so it stays on top when switching spaces.
         petWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
     } catch (e) {
         console.warn('Could not enable advanced always-on-top for petWindow:', e && e.message);
@@ -87,7 +88,6 @@ function createInterventionPopup(data) {
         console.log('❌ Popup closed');
     });
 
-    // Ensure popup stays above other windows and is visible across spaces/fullscreen on macOS.
     try {
         popupWindow.setAlwaysOnTop(true, 'screen-saver');
         popupWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
@@ -98,8 +98,48 @@ function createInterventionPopup(data) {
     console.log('✅ Popup opened:', data.isThreat ? 'AUTO (threat)' : 'MANUAL (user click)');
 }
 
+function createConversationWindow(threatData) {
+    console.log('🎯 createConversationWindow called with data:', threatData);
+
+    if (conversationWindow && !conversationWindow.isDestroyed()) {
+        conversationWindow.close();
+    }
+
+    conversationWindow = new BrowserWindow({
+        width: 900,
+        height: 700,
+        resizable: true,
+        frame: true,
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: path.join(__dirname, 'preload.js')
+        },
+        backgroundColor: '#111827',
+        title: 'FrostByte - Security Assistant'
+    });
+
+    conversationWindow.loadFile('conversation.html');
+
+    conversationWindow.webContents.on('did-finish-load', () => {
+        console.log('💬 Window loaded, sending threat data:', threatData);
+        conversationWindow.webContents.send('conversation-data', threatData);
+    });
+
+    conversationWindow.on('closed', () => {
+        conversationWindow = null;
+        currentThreatData = null;
+    });
+
+    // TEMPORARILY OPEN DEVTOOLS TO SEE ERRORS
+    conversationWindow.webContents.openDevTools();
+}
+
+// IPC HANDLERS
+
 ipcMain.on('show-intervention', (event, data) => {
-    console.log('🚨 IPC: show-intervention');
+    console.log('🚨 IPC: show-intervention with data:', data);
+    currentThreatData = data;
     createInterventionPopup(data);
 });
 
@@ -110,9 +150,46 @@ ipcMain.on('close-popup', () => {
     }
 });
 
-ipcMain.on('start-conversation', () => {
-    console.log('💬 IPC: start-conversation');
+ipcMain.on('start-conversation', (event) => {
+    console.log('🎤 IPC: start-conversation with threat data:', currentThreatData);
+
+    if (currentThreatData) {
+        createConversationWindow(currentThreatData);
+    } else {
+        console.warn('⚠️  No threat data available for conversation');
+        createConversationWindow({
+            type: 'Security Threat',
+            severity: 50,
+            details: 'A security issue was detected.',
+            timestamp: new Date().toISOString(),
+            isThreat: true
+        });
+    }
 });
+
+ipcMain.on('close-conversation', (event) => {
+    console.log('❌ IPC: close-conversation');
+    if (conversationWindow && !conversationWindow.isDestroyed()) {
+        conversationWindow.close();
+    }
+});
+
+ipcMain.handle('send-chat-message', async (event, { message, threatContext }) => {
+    try {
+        const fetch = require('node-fetch');
+        const response = await fetch('http://localhost:8000/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message, threat_context: threatContext })
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('❌ Chat IPC error:', error);
+        return { error: error.message };
+    }
+});
+
+// APP LIFECYCLE
 
 app.whenReady().then(() => {
     console.log('🚀 Creating pet widget...');

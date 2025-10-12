@@ -8,11 +8,13 @@
     "build:css": "tailwindcss -i ./src/index.css -o ./dist/components/index.css",
     "build:pet": "esbuild src/petRenderer.jsx --bundle --outfile=dist/petRenderer.js --platform=browser --format=iife --external:electron",
     "build:popup": "esbuild src/popupRenderer.jsx --bundle --outfile=dist/popupRenderer.js --platform=browser --format=iife --external:electron",
-    "build:js": "npm run build:pet && npm run build:popup",
+    "build:conversation": "esbuild src/conversationRenderer.jsx --bundle --outfile=dist/conversationRenderer.js --platform=browser --format=iife --external:electron",
+    "build:js": "npm run build:pet && npm run build:popup && npm run build:conversation",
     "build": "npm run build:css && npm run build:js",
     "watch:css": "tailwindcss -i ./src/index.css -o ./dist/components/index.css --watch",
     "watch:pet": "esbuild src/petRenderer.jsx --bundle --outfile=dist/petRenderer.js --platform=browser --format=iife --external:electron --watch",
     "watch:popup": "esbuild src/popupRenderer.jsx --bundle --outfile=dist/popupRenderer.js --platform=browser --format=iife --external:electron --watch",
+    "watch:conversation": "esbuild src/conversationRenderer.jsx --bundle --outfile=dist/conversationRenderer.js --platform=browser --format=iife --external:electron --watch",
     "dev": "npm run build && npm run start"
   },
   "keywords": [
@@ -27,6 +29,7 @@
   "dependencies": {
     "electron": "^38.2.2",
     "howler": "^2.2.3",
+    "node-fetch": "^2.7.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

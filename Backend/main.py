@@ -37,6 +37,8 @@ app.add_middleware(
 )
 
 # ----------------- PET STATE (Simple version) -----------------
+
+
 class SimplePetState:
     def __init__(self):
         self.health = 100
@@ -70,6 +72,7 @@ class SimplePetState:
     def snapshot(self):
         return {"health": self.health, "mood": self.mood, "last_event": self.last_event}
 
+
 # Initialize pet - use advanced PetManager if available, otherwise simple
 if HAS_GEMINI:
     security_detector = SecurityDetector()
@@ -81,6 +84,8 @@ else:
     print("✅ Using simple PetState (Gemini not available)")
 
 # ----------------- WebSocket Manager (Unified) -----------------
+
+
 class ConnectionManager:
     def __init__(self):
         self.active: List[WebSocket] = []
@@ -106,6 +111,7 @@ class ConnectionManager:
         for s in stale:
             self.disconnect(s)
 
+
 manager = ConnectionManager()
 
 # Monitoring state (for Gemini Computer Use)
@@ -113,6 +119,8 @@ monitoring_active = False
 monitoring_task: Optional[asyncio.Task] = None
 
 # ----------------- WebSocket Endpoints -----------------
+
+
 @app.websocket('/ws')
 async def websocket_main(ws: WebSocket):
     """Main WebSocket endpoint for frontend"""
@@ -123,12 +131,13 @@ async def websocket_main(ws: WebSocket):
             await ws.send_json({"type": "health_update", "pet_state": pet_manager.get_state()})
         else:
             await ws.send_json({"type": "pet_snapshot", "data": pet_manager.snapshot()})
-        
+
         while True:
             data = await ws.receive_text()
             await ws.send_json({"echo": data})
     except WebSocketDisconnect:
         manager.disconnect(ws)
+
 
 @app.websocket('/ws/demo')
 async def websocket_demo(ws: WebSocket):
@@ -145,6 +154,8 @@ async def websocket_demo(ws: WebSocket):
         manager.disconnect(ws)
 
 # ----------------- Pet REST Endpoints -----------------
+
+
 @app.get("/")
 @app.get("/healthz")
 async def root():
@@ -159,11 +170,12 @@ async def root():
         }
     else:
         return {
-            "status": "running", 
+            "status": "running",
             "message": "CyberPet - Simple Backend",
             "state": pet_manager.snapshot(),
             "gemini_enabled": False
         }
+
 
 @app.get('/pet')
 @app.get("/api/pet-state")
@@ -174,6 +186,7 @@ def get_pet():
     else:
         return pet_manager.snapshot()
 
+
 @app.post('/pet/event')
 async def post_event(event: str = Form(...)):
     """Simple event endpoint (legacy)"""
@@ -183,7 +196,7 @@ async def post_event(event: str = Form(...)):
     else:
         pet_manager.apply_event(event)
         pet_state = pet_manager.snapshot()
-    
+
     await manager.broadcast({"type": "pet_snapshot", "data": pet_state})
     return pet_state
 
@@ -191,10 +204,12 @@ async def post_event(event: str = Form(...)):
 if HAS_GEMINI:
     @app.post("/api/security-event")
     async def log_security_event(event: SecurityEvent):
-        print(f"\n📨 Event from extension: {event.type} (severity: {event.severity})")
-        
-        pet_state = pet_manager.process_threat_event(event.severity, event.type)
-        
+        print(
+            f"\n📨 Event from extension: {event.type} (severity: {event.severity})")
+
+        pet_state = pet_manager.process_threat_event(
+            event.severity, event.type)
+
         await manager.broadcast({
             "type": "threat_detected",
             "threat": {
@@ -205,7 +220,7 @@ if HAS_GEMINI:
             },
             "pet_state": pet_state
         })
-        
+
         return {"pet_state": pet_state, "should_popup": event.severity > 50}
 
     @app.post("/api/good-behavior")
@@ -223,31 +238,31 @@ if HAS_GEMINI:
     @app.post("/api/monitoring/start")
     async def start_monitoring_endpoint():
         global monitoring_active, monitoring_task
-        
+
         if monitoring_active:
             return {"status": "already_running", "message": "Monitoring is already active"}
-        
+
         monitoring_active = True
         monitoring_task = asyncio.create_task(monitor_loop())
-        
+
         return {"status": "started", "message": f"Monitoring started - checking every {settings.SCREENSHOT_INTERVAL} seconds"}
 
     @app.post("/api/monitoring/stop")
     async def stop_monitoring_endpoint():
         global monitoring_active, monitoring_task
-        
+
         if not monitoring_active:
             return {"status": "not_running", "message": "Monitoring is not active"}
-        
+
         monitoring_active = False
-        
+
         if monitoring_task:
             monitoring_task.cancel()
             try:
                 await monitoring_task
             except asyncio.CancelledError:
                 pass
-        
+
         return {"status": "stopped", "message": "Monitoring stopped"}
 
     @app.get("/api/monitoring/status")
@@ -276,9 +291,9 @@ if HAS_GEMINI:
     async def test_trigger_threat(data: dict):
         severity = data.get("severity", 75)
         threat_type = data.get("threat_type", "test_threat")
-        
+
         pet_state = pet_manager.process_threat_event(severity, threat_type)
-        
+
         await manager.broadcast({
             "type": "threat_detected",
             "threat": {
@@ -289,7 +304,7 @@ if HAS_GEMINI:
             },
             "pet_state": pet_state
         })
-        
+
         return {"success": True, "pet_state": pet_state}
 
     # Demo Control
@@ -301,9 +316,9 @@ if HAS_GEMINI:
         pet_manager.good_behavior_streak = 0
         pet_manager.event_history = []
         pet_manager._save_state()
-        
+
         await manager.broadcast({"type": "health_update", "pet_state": pet_manager.get_state()})
-        
+
         print("\n🔄 Pet reset to default state")
         return {"status": "reset", "pet_state": pet_manager.get_state()}
 
@@ -312,61 +327,63 @@ if HAS_GEMINI:
         health = data.get("health", 100)
         pet_manager.health = max(0, min(100, health))
         pet_manager._save_state()
-        
+
         await manager.broadcast({"type": "health_update", "pet_state": pet_manager.get_state()})
-        
+
         print(f"\n💊 Pet health manually set to {health}")
         return {"status": "updated", "pet_state": pet_manager.get_state()}
 
     # Background Monitoring
     async def monitor_loop():
         global monitoring_active
-        
+
         print("\n" + "="*60)
         print("🚀 GEMINI 2.5 COMPUTER USE - MONITORING STARTED")
         print(f"   Interval: {settings.SCREENSHOT_INTERVAL} seconds")
         print("="*60)
-        
+
         check_count = 0
-        
+
         try:
             while monitoring_active:
                 check_count += 1
                 print(f"\n{'='*60}")
                 print(f"🔍 Check #{check_count}")
                 print(f"{'='*60}")
-                
+
                 try:
                     result = await gemini_computer_use.analyze_and_act()
-                    
+
                     if result["threat_detected"]:
                         pet_state = pet_manager.process_threat_event(
                             severity=result["confidence"],
                             threat_type=result["threat_type"]
                         )
-                        
+
                         await manager.broadcast({
                             "type": "threat_detected",
                             "threat": result,
                             "pet_state": pet_state
                         })
-                        
+
                         print(f"\n🚨 ALERT SENT TO FRONTEND")
                     else:
-                        pet_state = pet_manager.process_good_behavior(settings.SCREENSHOT_INTERVAL)
-                        
+                        pet_state = pet_manager.process_good_behavior(
+                            settings.SCREENSHOT_INTERVAL)
+
                         await manager.broadcast({
                             "type": "health_update",
                             "pet_state": pet_state
                         })
-                    
-                    print(f"\n⏳ Next check in {settings.SCREENSHOT_INTERVAL} seconds...")
+
+                    print(
+                        f"\n⏳ Next check in {settings.SCREENSHOT_INTERVAL} seconds...")
                     await asyncio.sleep(settings.SCREENSHOT_INTERVAL)
-                
+
                 except Exception as e:
                     print(f"❌ Check error: {e}")
                     await asyncio.sleep(5)
-        
+
         except asyncio.CancelledError:
             print("\n⏹️  Monitoring stopped by user")
             raise
@@ -376,13 +393,95 @@ ELEVEN_BASE = 'https://api.elevenlabs.io/v1'
 VOICES_DIR = Path("voices")
 VOICES_DIR.mkdir(exist_ok=True)
 
+
 def _get_api_key() -> Optional[str]:
     return os.environ.get('ELEVENLABS_API_KEY')
+
+
+# ----------------- Debug & Chat Endpoints -----------------
+@app.get('/api/debug/gemini')
+def debug_gemini():
+    """Return simple diagnostics about Gemini availability and API key presence."""
+    info = {
+        "has_gemini": HAS_GEMINI,
+        "google_api_key_set": bool(getattr(settings, 'GOOGLE_API_KEY', None)),
+        "google_api_key_masked": None,
+    }
+    if settings.GOOGLE_API_KEY:
+        key = settings.GOOGLE_API_KEY
+        info["google_api_key_masked"] = f"{key[:6]}...{key[-4:]}" if len(
+            key) > 12 else "(set)"
+
+    if HAS_GEMINI:
+        try:
+            client = getattr(gemini_computer_use, 'client', None)
+            info.update({
+                "client_present": bool(client),
+                "client_type": type(client).__name__ if client else None,
+            })
+        except Exception as e:
+            info["client_error"] = str(e)
+
+    return info
+
+
+@app.post('/api/chat')
+async def chat_endpoint(payload: dict = Body(...)):
+    """Simple chat endpoint used by the desktop ConversationWindow.
+
+    - If Gemini is available and a Google API key is set, attempt a lightweight
+      generate_content call and return the text.
+    - Otherwise return a helpful fallback message so the frontend doesn't hang
+      on a 404 or network error.
+    """
+    message = payload.get('message', '')
+    threat_context = payload.get('threat_context')
+
+    if not message:
+        return JSONResponse({"error": "no message provided"}, status_code=400)
+
+    # If Gemini not available, return fallback so the UI still works
+    if not HAS_GEMINI:
+        return {"response": f"(fallback) Gemini not available on server. Echo: {message}"}
+
+    # If key missing, surface a clear error
+    if not settings.GOOGLE_API_KEY:
+        return JSONResponse({"error": "GOOGLE_API_KEY not set on server"}, status_code=500)
+
+    # Try a minimal Gemini request (best-effort).
+    try:
+        from google.genai.types import Content, Part
+
+        contents = [Content(role="user", parts=[Part(text=message)])]
+        # Use a reasonably generic model name; gemini_computer_use uses a more specific model
+        model_name = getattr(gemini_computer_use, 'default_model',
+                             'gemini-2.5-computer-use-preview-10-2025')
+        resp = gemini_computer_use.client.models.generate_content(
+            model=model_name, contents=contents)
+
+        # Extract text parts
+        ai_text = None
+        if getattr(resp, 'candidates', None):
+            cand = resp.candidates[0]
+            parts = [p.text for p in getattr(
+                cand.content, 'parts', []) if getattr(p, 'text', None)]
+            ai_text = ' '.join(parts).strip()
+
+        if not ai_text:
+            ai_text = "(no text response from Gemini)"
+
+        return {"response": ai_text}
+
+    except Exception as e:
+        print(f"❌ /api/chat error: {e}")
+        return JSONResponse({"error": "Gemini request failed", "detail": str(e)}, status_code=502)
+
 
 def _save_as_latest(binary: bytes, ext: str = ".mp3") -> Path:
     latest = VOICES_DIR / f"latest{ext}"
     latest.write_bytes(binary)
     return latest
+
 
 @app.get('/eleven/voices')
 def list_voices():
@@ -398,6 +497,7 @@ def list_voices():
     except requests.RequestException as e:
         return JSONResponse({"error": str(e)}, status_code=502)
 
+
 @app.post('/eleven/tts')
 async def eleven_tts(text: str = Form(...), voice_id: Optional[str] = Form(None), fmt: str = Form('mp3')):
     key = _get_api_key()
@@ -405,20 +505,22 @@ async def eleven_tts(text: str = Form(...), voice_id: Optional[str] = Form(None)
         return JSONResponse({"error": "ELEVENLABS_API_KEY not set"}, status_code=400)
     if fmt not in ('mp3', 'wav'):
         return JSONResponse({"error": "fmt must be 'mp3' or 'wav'"}, status_code=400)
-    
+
     if not voice_id:
         try:
-            vresp = requests.get(f"{ELEVEN_BASE}/voices", headers={'xi-api-key': key}, timeout=10)
+            vresp = requests.get(f"{ELEVEN_BASE}/voices",
+                                 headers={'xi-api-key': key}, timeout=10)
             vresp.raise_for_status()
             payload = vresp.json()
-            voices = payload.get('voices') if isinstance(payload, dict) else payload
+            voices = payload.get('voices') if isinstance(
+                payload, dict) else payload
             if isinstance(voices, list) and voices:
                 voice_id = voices[0].get('voice_id') or voices[0].get('id')
         except requests.RequestException:
             voice_id = None
     if not voice_id:
         return JSONResponse({"error": "No voice_id available"}, status_code=400)
-    
+
     url = f"{ELEVEN_BASE}/text-to-speech/{voice_id}"
     headers = {
         'xi-api-key': key,
@@ -426,7 +528,7 @@ async def eleven_tts(text: str = Form(...), voice_id: Optional[str] = Form(None)
         'Content-Type': 'application/json',
     }
     payload = {"text": text}
-    
+
     try:
         with requests.post(url, headers=headers, json=payload, stream=True, timeout=60) as r:
             r.raise_for_status()
@@ -442,9 +544,11 @@ async def eleven_tts(text: str = Form(...), voice_id: Optional[str] = Form(None)
     except requests.RequestException as e:
         return JSONResponse({"error": str(e)}, status_code=502)
 
+
 @app.get("/voice/latest")
 def voice_latest():
-    cands = sorted(VOICES_DIR.glob("latest.*"), key=lambda p: p.stat().st_mtime, reverse=True)
+    cands = sorted(VOICES_DIR.glob("latest.*"),
+                   key=lambda p: p.stat().st_mtime, reverse=True)
     if not cands:
         return JSONResponse({"error": "no voice available"}, status_code=404)
     ext = cands[0].suffix.lower()
@@ -452,12 +556,15 @@ def voice_latest():
     return FileResponse(cands[0], media_type=media)
 
 # ----------------- Startup Event -----------------
+
+
 @app.on_event("startup")
 async def startup_event():
     if HAS_GEMINI:
         print("\n✅ Gemini 2.5 Computer Use initialized")
         print("💡 Monitoring is OFF - Use POST /api/monitoring/start to begin")
-        print(f"💡 Will check every {settings.SCREENSHOT_INTERVAL} seconds when enabled")
+        print(
+            f"💡 Will check every {settings.SCREENSHOT_INTERVAL} seconds when enabled")
     else:
         print("\n✅ Simple backend initialized (Gemini modules not available)")
     print("🎤 ElevenLabs TTS endpoints available")
