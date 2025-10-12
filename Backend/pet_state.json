@@ -1,0 +1,15 @@
+{
+  "health": 83.0,
+  "evolution_stage": 1,
+  "points": 0,
+  "streak": 0,
+  "event_history": [
+    {
+      "type": "threat",
+      "threat_type": "test_phishing",
+      "severity": 85,
+      "damage": 17.0,
+      "timestamp": "2025-10-12T07:23:56.815585"
+    }
+  ]
+}

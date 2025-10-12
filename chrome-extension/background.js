@@ -1,7 +1,8 @@
 // background.js
-importScripts('utils/apiClient.js', 'utils/urlAnalyzer.js');
+import { APIClient } from './utils/apiClient.js';  // Fixed import
+import { analyzeUrl } from './utils/urlAnalyzer.js';
 
-console.log('🔒 CyberPet Guardian background service started');
+console.log('🔒 CyberPet Guardian background service worker started');
 
 class SecurityMonitor {
   constructor() {
@@ -9,30 +10,30 @@ class SecurityMonitor {
     this.currentTab = null;
     this.backendURL = 'http://localhost:8000';
     this.apiClient = new APIClient(this.backendURL);
+
+    // Initialize listeners and alarms
     this.init();
   }
 
   init() {
     chrome.tabs.onActivated.addListener(this.handleTabChange.bind(this));
+    chrome.tabs.onUpdated.addListener(this.checkHTTP.bind(this));
     chrome.webNavigation.onCompleted.addListener(this.handlePageLoad.bind(this));
     chrome.webRequest.onBeforeRequest.addListener(
       this.handleWebRequest.bind(this),
       { urls: ["<all_urls>"] }
     );
-    chrome.tabs.onUpdated.addListener(this.checkHTTP.bind(this));
+
     chrome.alarms.create('securityCheck', { periodInMinutes: 1 });
     chrome.alarms.onAlarm.addListener(this.periodicCheck.bind(this));
+
     this.loadThreatsFromStorage();
   }
 
   async loadThreatsFromStorage() {
-    try {
-      const result = await chrome.storage.local.get(['threats']);
-      this.threats = result.threats || [];
-      this.updateBadge();
-    } catch (error) {
-      console.error('Error loading threats from storage:', error);
-    }
+    const result = await chrome.storage.local.get(['threats']);
+    this.threats = result.threats || [];
+    this.updateBadge();
   }
 
   async handleTabChange(activeInfo) {
@@ -40,56 +41,46 @@ class SecurityMonitor {
       const tab = await chrome.tabs.get(activeInfo.tabId);
       this.currentTab = tab;
       await this.analyzeCurrentPage(tab);
-    } catch (error) {
-      console.error('Error handling tab change:', error);
+    } catch (e) {
+      console.error(e);
     }
   }
 
   async handlePageLoad(details) {
-    if (details.frameId === 0) {
-      try {
-        const tab = await chrome.tabs.get(details.tabId);
-        await this.analyzeCurrentPage(tab);
-      } catch (error) {
-        console.error('Error handling page load:', error);
-      }
-    }
+    if (details.frameId !== 0) return;
+    const tab = await chrome.tabs.get(details.tabId);
+    await this.analyzeCurrentPage(tab);
   }
 
   async handleWebRequest(details) {
     const threat = await analyzeUrl(details.url);
-    if (threat.isDangerous) {
-      await this.reportThreat({
-        type: 'phishing',
-        message: threat.message,
-        severity: 'danger',
-        url: details.url,
-        timestamp: new Date().toISOString()
-      });
-      this.updateExtensionIcon('warning');
-    }
+    if (threat.isDangerous) this.reportThreat({
+      type: 'phishing',
+      message: threat.message,
+      severity: 'danger',
+      url: details.url,
+      timestamp: new Date().toISOString()
+    });
+    this.updateBadge();
   }
 
   async checkHTTP(tabId, changeInfo, tab) {
     if (changeInfo.status === 'complete' && tab.url?.startsWith('http://') && !tab.url.startsWith('http://localhost')) {
-      const threat = {
+      await this.reportThreat({
         type: 'insecure_connection',
         message: `HTTP site detected: ${new URL(tab.url).hostname}`,
         severity: 'warning',
         url: tab.url,
         timestamp: new Date().toISOString()
-      };
-      await this.reportThreat(threat);
-      this.updateExtensionIcon('warning');
+      });
+      this.updateBadge();
     }
   }
 
   async analyzeCurrentPage(tab) {
     if (!tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('edge://')) return;
 
-    console.log('🔍 Analyzing page:', tab.url);
     const threat = await analyzeUrl(tab.url);
-
     if (threat.isDangerous) {
       await this.reportThreat({
         type: 'phishing',
@@ -98,9 +89,7 @@ class SecurityMonitor {
         url: tab.url,
         timestamp: new Date().toISOString()
       });
-      this.updateExtensionIcon('danger');
     }
-
     this.updateBadge();
   }
 
@@ -116,18 +105,7 @@ class SecurityMonitor {
       timestamp: threat.timestamp
     });
 
-    await this.updateStorage();
-  }
-
-  async updateStorage() {
-    await chrome.storage.local.set({
-      threats: this.threats,
-      lastScan: new Date().toISOString(),
-      threatCount: this.threats.filter(t => t.severity === 'danger').length
-    });
-  }
-
-  updateExtensionIcon(status) {
+    await chrome.storage.local.set({ threats: this.threats });
     this.updateBadge();
   }
 
@@ -145,23 +123,17 @@ class SecurityMonitor {
 
 const securityMonitor = new SecurityMonitor();
 
-// Message handler for popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log('Received message:', request.action);
-
   if (request.action === 'getThreats') {
     chrome.storage.local.get(['threats', 'lastScan']).then(sendResponse);
     return true;
   }
-
   if (request.action === 'manualScan') {
     chrome.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
       if (tab) {
         securityMonitor.analyzeCurrentPage(tab);
         sendResponse({ status: 'scan_completed' });
-      } else {
-        sendResponse({ status: 'no_active_tab' });
-      }
+      } else sendResponse({ status: 'no_active_tab' });
     });
     return true;
   }

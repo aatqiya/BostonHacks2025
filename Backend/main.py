@@ -8,9 +8,11 @@ from pathlib import Path
 from typing import List, Optional
 
 import requests
+import google.generativeai as genai
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, Form, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
+from google.genai import types
 from starlette.websockets import WebSocketState
 
 # Import your teammate's modules (make sure these files exist)
@@ -453,28 +455,47 @@ async def chat_endpoint(payload: dict = Body(...)):
         from google.genai.types import Content, Part
 
         contents = [Content(role="user", parts=[Part(text=message)])]
-        # Use a reasonably generic model name; gemini_computer_use uses a more specific model
-        model_name = getattr(gemini_computer_use, 'default_model',
-                             'gemini-2.5-computer-use-preview-10-2025')
+        # Use a more standard and available model for chat.
+        model_name = 'models/gemini-2.5-computer-use-preview-10-2025'
+        # This specific model requires the 'computer_use' tool to be declared.
+        # We can exclude all functions if we only want chat.
+        tools_config = [
+            types.Tool(
+                computer_use=types.ComputerUse(
+                    excluded_predefined_functions=["*"]
+                )
+            )
+        ]
+        config = types.GenerateContentConfig(tools=tools_config)
+
         resp = gemini_computer_use.client.models.generate_content(
-            model=model_name, contents=contents)
+            model=model_name, contents=contents, config=config)
 
         # Extract text parts
         ai_text = None
-        if getattr(resp, 'candidates', None):
+        if getattr(resp, 'candidates', None) and resp.candidates:
             cand = resp.candidates[0]
-            parts = [p.text for p in getattr(
-                cand.content, 'parts', []) if getattr(p, 'text', None)]
-            ai_text = ' '.join(parts).strip()
+            if getattr(cand.content, 'parts', None):
+                parts = [p.text for p in cand.content.parts if getattr(
+                    p, 'text', None)]
+                ai_text = ' '.join(parts).strip()
 
         if not ai_text:
-            ai_text = "(no text response from Gemini)"
+            # Check for a safety block
+            if cand.finish_reason.name == "SAFETY":
+                ai_text = "I cannot respond to that as it violates safety policies."
+                print("❌ /api/chat blocked by safety settings")
+            else:
+                ai_text = f"(No text response from Gemini. Finish reason: {cand.finish_reason.name})"
 
         return {"response": ai_text}
 
     except Exception as e:
-        print(f"❌ /api/chat error: {e}")
-        return JSONResponse({"error": "Gemini request failed", "detail": str(e)}, status_code=502)
+        # Return the actual error from the Gemini client to the frontend for easier debugging.
+        error_detail = str(e)
+        print(f"❌ /api/chat error: {error_detail}")
+        # The frontend will now receive the specific error message.
+        return JSONResponse({"error": "Gemini request failed", "detail": error_detail}, status_code=502)
 
 
 def _save_as_latest(binary: bytes, ext: str = ".mp3") -> Path:
@@ -568,3 +589,37 @@ async def startup_event():
     else:
         print("\n✅ Simple backend initialized (Gemini modules not available)")
     print("🎤 ElevenLabs TTS endpoints available")
+
+
+@app.get('/api/debug/list-models')
+def list_gemini_models():
+    """Lists all Gemini models available to the API key that support generateContent."""
+    if not HAS_GEMINI:
+        return JSONResponse({"error": "Gemini modules not available"}, status_code=500)
+
+    if not settings.GOOGLE_API_KEY:
+        return JSONResponse(
+            {"error": "GOOGLE_API_KEY is not set."},
+            status_code=500
+        )
+
+    try:
+        # Official way to list models, requires the API key to be configured.
+        genai.configure(api_key=settings.GOOGLE_API_KEY)
+
+        print("🔍 Listing available Gemini models...")
+        models = [
+            {
+                "name": m.name,
+                "display_name": m.display_name,
+                "description": m.description,
+                "version": m.version,
+            }
+            for m in genai.list_models()
+            if 'generateContent' in m.supported_generation_methods
+        ]
+        print(f"✅ Found {len(models)} models supporting generateContent.")
+        return {"models": models}
+    except Exception as e:
+        print(f"❌ Error listing models: {e}")
+        return JSONResponse({"error": "Failed to list Gemini models", "detail": str(e)}, status_code=502)

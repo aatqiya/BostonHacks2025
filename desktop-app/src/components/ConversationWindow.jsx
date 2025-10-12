@@ -116,7 +116,10 @@ export default function ConversationWindow() {
                 addMessage('ai', aiResponse);
                 await speakText(aiResponse);
             } else {
-                addMessage('ai', "Sorry, I had trouble processing that. Can you try again?");
+                const errorData = await response.json();
+                console.error('❌ Chat API error:', errorData);
+                const errorMessage = `Sorry, I had trouble processing that. The server said: ${errorData.detail || response.statusText}`;
+                addMessage('ai', errorMessage);
             }
         } catch (error) {
             console.error('❌ Chat error:', error);

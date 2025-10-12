@@ -1,5 +1,5 @@
-// utils/apiClient.js
-class APIClient {
+// utils/api.js
+export class APIClient {
   constructor(baseURL) {
     this.baseURL = baseURL;
   }

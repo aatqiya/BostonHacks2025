@@ -1,5 +1,5 @@
 // utils/urlAnalyzer.js
-async function analyzeUrl(url) {
+export async function analyzeUrl(url) {
   const parsedUrl = new URL(url);
   const domain = parsedUrl.hostname.toLowerCase();
 

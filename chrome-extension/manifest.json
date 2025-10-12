@@ -3,7 +3,6 @@
   "name": "CyberPet Guardian",
   "version": "1.0.0",
   "description": "Your evolvable AI pet that protects you from cyber threats in real-time while rewarding safe habits.",
-
   "permissions": [
     "tabs",
     "webNavigation",
@@ -13,25 +12,25 @@
     "webRequest",
     "notifications"
   ],
-
   "host_permissions": [
     "<all_urls>",
     "http://localhost:8000/*"
   ],
-
   "background": {
     "service_worker": "background.js",
     "type": "module"
   },
-
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ],
-
   "action": {
     "default_popup": "popup.html",
     "default_title": "CyberPet Guardian",
@@ -41,13 +40,11 @@
       "128": "assets/outline-icon.png"
     }
   },
-
   "icons": {
     "16": "assets/outline-icon.png",
     "48": "assets/outline-icon.png",
     "128": "assets/outline-icon.png"
   },
-
   "web_accessible_resources": [
     {
       "resources": [
@@ -57,12 +54,11 @@
         "assets/shield.png",
         "assets/check-icon.png"
       ],
-      "matches": ["<all_urls>"]
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ],
-
-  "options_page": "options.html",
-
   "short_name": "CyberPet",
   "author": "CyberPet Labs"
 }
