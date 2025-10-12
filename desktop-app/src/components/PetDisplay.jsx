@@ -91,9 +91,9 @@ export default function PetDisplay() {
 
   const getPetAnimation = () => {
     if (petState.state === 'critical' || petState.state === 'alert') {
-      return 'animate-pulse';
+      return <img src="petimages/idlecyberpet.gif" />;
     }
-    return '';
+    return <img src="petimages/idlecyberpet.gif" />;
   };
 
   return (
@@ -106,7 +106,7 @@ export default function PetDisplay() {
         }}
       >
         <div className="text-6xl select-none">
-          {petState.state === 'alert' || petState.state === 'critical' ? '😱' : '😊'}
+          {petState.state === 'alert' || petState.state === 'critical' ? '😱' : '💔'}
         </div>
       </div>
     </div>
