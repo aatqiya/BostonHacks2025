@@ -13,31 +13,30 @@ function createPetWindow() {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
     
     petWindow = new BrowserWindow({
-        width: 200,
+        width: 200, // Small widget size
         height: 250,
-        // Position in the bottom-right corner, adjusted for size
-        x: width - 270, 
-        y: height - 320,
-        frame: false,             // No native title bar
-        transparent: true,        // Allows custom shapes/transparency
-        alwaysOnTop: true,        // Keeps it above other apps
-        skipTaskbar: true,        // Hides it from the taskbar/dock
+        
+        // --- Corner Positioning ---
+        x: width - 220, // Position 20px from the right edge
+        y: height - 270, // Position 20px from the bottom edge
+        
+        // Re-enable these features for a floating widget:
+        frame: false,       // REMOVE standard title bar
+        transparent: false,  // ALLOW the widget background to blend (Critical!)
+        alwaysOnTop: true,  // Keep it above other apps
         resizable: false,
+        skipTaskbar: true,
+        
         webPreferences: {
-            // Must use a preload script for safe IPC between main and renderer
             preload: path.join(__dirname, 'preload.js'),
-            contextIsolation: true // Security best practice
+            contextIsolation: true 
         }
     });
 
-    // Load the HTML file that will host the PetDisplay React component
-    petWindow.loadFile('pet.html'); 
+    // Re-enable mouse event pass-through (so you can click through the transparent parts)
+    petWindow.setIgnoreMouseEvents(true, { forward: true });
 
-    petWindow.show();  // Forces the window to display
-    petWindow.focus(); // Forces the window to grab focus
-    
-    // CRUCIAL: Allows mouse clicks to pass through the transparent part of the window
-    petWindow.setIgnoreMouseEvents(true, { forward: true }); 
+    petWindow.loadFile('pet.html'); 
 }
 
 /**
