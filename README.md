@@ -2,8 +2,10 @@
 To Start Everything (after initial setup):
 
 Terminal 1 - Backend:
-bashcd backend
+cd backend
+python3 -m venv .venv
 source venv/bin/activate
+pip install -r requirements.txt
 python -m uvicorn main:app --reload --port 8000
 
 Terminal 2 - CSS Build:
@@ -11,11 +13,13 @@ bashcd desktop-app
 npx tailwindcss -i ./src/index.css -o ./dist/components/index.css --watch
 
 Terminal 3 - JS Build:
-bashcd desktop-app
+cd desktop-app
 npx babel src --out-dir dist --extensions .jsx,.js --watch
 
 Terminal 4 - Electron App:
-bashcd desktop-app
+cd desktop-app
+
+
 <!-- npm start
 <!DOCTYPE html>
 <html>

@@ -35,6 +35,16 @@ function createPetWindow() {
         petWindow = null;
     });
 
+    // Try to make the pet float above everything (including fullscreen) on macOS.
+    try {
+        // 'screen-saver' is the highest level and commonly keeps the window above fullscreen apps.
+        petWindow.setAlwaysOnTop(true, 'screen-saver');
+        // Make visible on all workspaces (spaces and full screen) so it stays on top when switching spaces.
+        petWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    } catch (e) {
+        console.warn('Could not enable advanced always-on-top for petWindow:', e && e.message);
+    }
+
     console.log('✅ Pet widget created (clickable)');
 }
 
@@ -76,6 +86,14 @@ function createInterventionPopup(data) {
         popupWindow = null;
         console.log('❌ Popup closed');
     });
+
+    // Ensure popup stays above other windows and is visible across spaces/fullscreen on macOS.
+    try {
+        popupWindow.setAlwaysOnTop(true, 'screen-saver');
+        popupWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    } catch (e) {
+        console.warn('Could not enable advanced always-on-top for popupWindow:', e && e.message);
+    }
 
     console.log('✅ Popup opened:', data.isThreat ? 'AUTO (threat)' : 'MANUAL (user click)');
 }

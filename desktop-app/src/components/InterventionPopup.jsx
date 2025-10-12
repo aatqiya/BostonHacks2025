@@ -59,106 +59,124 @@ export default function InterventionPopup() {
 
     const isThreat = data.isThreat;
 
-    return (
-        <div className={`w-full h-full ${isThreat
-                ? `bg-gradient-to-br ${getSeverityColor(data.severity || 50)}`
-                : 'bg-gradient-to-br from-gray-700 to-gray-900'
-            } flex items-center justify-center p-6`}>
-            <div className="bg-white rounded-xl shadow-2xl p-6 max-w-lg w-full">
+    // When not a threat (regular dashboard), remove outer padding and make the white card
+    // stretch to the full height so there's no white gap at the bottom. Keep the threat
+    // appearance identical to before.
+    const outerBackground = isThreat
+        ? `bg-gradient-to-br ${getSeverityColor(data.severity || 50)}`
+        : 'bg-gradient-to-br from-gray-700 to-gray-900';
 
-                {/* Header - Different for Threat vs Manual Open */}
-                {isThreat ? (
-                    // THREAT MODE
-                    <div className="text-center mb-4">
-                        <div className="text-6xl mb-2">🚨</div>
-                        <h1 className="text-3xl font-bold text-red-600 mb-2">
-                            SECURITY THREAT!
-                        </h1>
-                        <div className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${data.severity >= 80 ? 'bg-red-600 text-white' :
+    const outerLayout = isThreat ? 'flex items-center justify-center p-6' : 'flex items-start justify-center p-0';
+
+    const cardClasses = isThreat
+        ? 'bg-white rounded-xl shadow-2xl p-6 max-w-lg w-full'
+        : 'bg-white rounded-xl shadow-2xl p-6 max-w-lg w-full h-full flex flex-col';
+
+    return (
+        // Use min-h-screen (100vh) so the outer background always fills the window
+        // even if ancestor height isn't set. This prevents uncovered white space.
+        <div className={`w-full min-h-screen ${outerBackground} ${outerLayout}`}>
+            <div className={cardClasses}>
+
+                {/* Make the main content take remaining space so buttons stay at the bottom */}
+                <div className="flex-1 overflow-auto">
+
+                    {/* Header - Different for Threat vs Manual Open */}
+                    {isThreat ? (
+                        // THREAT MODE
+                        <div className="text-center mb-4">
+                            <div className="text-6xl mb-2">🚨</div>
+                            <h1 className="text-3xl font-bold text-red-600 mb-2">
+                                SECURITY THREAT!
+                            </h1>
+                            <div className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${data.severity >= 80 ? 'bg-red-600 text-white' :
                                 data.severity >= 60 ? 'bg-orange-500 text-white' :
                                     data.severity >= 40 ? 'bg-yellow-500 text-black' :
                                         'bg-yellow-400 text-black'
-                            }`}>
-                            {getSeverityText(data.severity || 50)} RISK
+                                }`}>
+                                {getSeverityText(data.severity || 50)} RISK
+                            </div>
                         </div>
-                    </div>
-                ) : (
-                    // MANUAL OPEN MODE
-                    <div className="text-center mb-4">
-                        <div className="text-6xl mb-2">🛡️</div>
-                        <h1 className="text-3xl font-bold text-green-600 mb-2">
-                            CyberPet Dashboard
-                        </h1>
-                        <p className="text-gray-600 text-sm">
-                            Monitor your pet's security status
-                        </p>
-                    </div>
-                )}
-
-                {/* Threat Details - Only show if threat */}
-                {isThreat && data.type && (
-                    <div className="mb-4 p-4 bg-red-50 rounded-lg">
-                        <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                            {data.type}
-                        </h2>
-                        <p className="text-gray-700 text-sm">
-                            {data.details || 'A security threat was detected.'}
-                        </p>
-                        {data.timestamp && (
-                            <p className="text-xs text-gray-500 mt-2">
-                                Detected: {new Date(data.timestamp).toLocaleString()}
+                    ) : (
+                        // MANUAL OPEN MODE
+                        <div className="text-center mb-4">
+                            <div className="text-6xl mb-2">❄️</div>
+                            <h1 className="text-3xl font-bold text-green-600 mb-2">
+                                FrostByte Dashboard
+                            </h1>
+                            <p className="text-gray-600 text-sm">
+                                Monitor your pet's security status
                             </p>
-                        )}
+                        </div>
+                    )}
+
+                    {/* Threat Details - Only show if threat */}
+                    {isThreat && data.type && (
+                        <div className="mb-4 p-4 bg-red-50 rounded-lg">
+                            <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                                {data.type}
+                            </h2>
+                            <p className="text-gray-700 text-sm">
+                                {data.details || 'A security threat was detected.'}
+                            </p>
+                            {data.timestamp && (
+                                <p className="text-xs text-gray-500 mt-2">
+                                    Detected: {new Date(data.timestamp).toLocaleString()}
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Pet Stats Panel - Always shown */}
+                    <div className="mb-4 p-4 bg-gray-800 rounded-lg text-white">
+                        <h3 className="text-lg font-bold text-green-400 mb-3 text-center">
+                            FrostByte Stats
+                        </h3>
+
+                        <div className="space-y-3">
+                            {/* Health Bar */}
+                            <div>
+                                <div className="flex justify-between text-sm mb-1">
+                                    <span>Health</span>
+                                    <span className="font-bold">{Math.round(petState.health)}%</span>
+                                </div>
+                                <div className="w-full h-3 bg-gray-700 rounded-full overflow-hidden">
+                                    <div
+                                        className={`h-full transition-all duration-500 ${getBarColor(petState.health)}`}
+                                        style={{ width: `${Math.max(0, Math.min(100, petState.health))}%` }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Stats Grid */}
+                            <div className="grid grid-cols-3 gap-2 text-center text-sm">
+                                <div className="bg-gray-700 p-2 rounded">
+                                    <div className="text-gray-400 text-xs">Stage</div>
+                                    <div className="font-bold text-green-400">{petState.evolution_stage}</div>
+                                </div>
+                                <div className="bg-gray-700 p-2 rounded">
+                                    <div className="text-gray-400 text-xs">Points</div>
+                                    <div className="font-bold text-blue-400">{petState.points}</div>
+                                </div>
+                                <div className="bg-gray-700 p-2 rounded">
+                                    <div className="text-gray-400 text-xs">Streak</div>
+                                    <div className="font-bold text-yellow-400">{petState.streak}</div>
+                                </div>
+                            </div>
+
+                            {/* Current State */}
+                            <div className="text-center">
+                                <span className="text-xs text-gray-400">Status: </span>
+                                <span className="font-semibold capitalize">{petState.state.replace('_', ' ')}</span>
+                            </div>
+                        </div>
                     </div>
-                )}
 
-                {/* Pet Stats Panel - Always shown */}
-                <div className="mb-4 p-4 bg-gray-800 rounded-lg text-white">
-                    <h3 className="text-lg font-bold text-green-400 mb-3 text-center">
-                        FrostByte Stats
-                    </h3>
+                    {/* Action Buttons */}
+                </div>{/* end scrollable main content */}
 
-                    <div className="space-y-3">
-                        {/* Health Bar */}
-                        <div>
-                            <div className="flex justify-between text-sm mb-1">
-                                <span>Health</span>
-                                <span className="font-bold">{Math.round(petState.health)}%</span>
-                            </div>
-                            <div className="w-full h-3 bg-gray-700 rounded-full overflow-hidden">
-                                <div
-                                    className={`h-full transition-all duration-500 ${getBarColor(petState.health)}`}
-                                    style={{ width: `${Math.max(0, Math.min(100, petState.health))}%` }}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Stats Grid */}
-                        <div className="grid grid-cols-3 gap-2 text-center text-sm">
-                            <div className="bg-gray-700 p-2 rounded">
-                                <div className="text-gray-400 text-xs">Stage</div>
-                                <div className="font-bold text-green-400">{petState.evolution_stage}</div>
-                            </div>
-                            <div className="bg-gray-700 p-2 rounded">
-                                <div className="text-gray-400 text-xs">Points</div>
-                                <div className="font-bold text-blue-400">{petState.points}</div>
-                            </div>
-                            <div className="bg-gray-700 p-2 rounded">
-                                <div className="text-gray-400 text-xs">Streak</div>
-                                <div className="font-bold text-yellow-400">{petState.streak}</div>
-                            </div>
-                        </div>
-
-                        {/* Current State */}
-                        <div className="text-center">
-                            <span className="text-xs text-gray-400">Status: </span>
-                            <span className="font-semibold capitalize">{petState.state.replace('_', ' ')}</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-3">
+                {/* Action Buttons - keep at bottom */}
+                <div className="flex gap-3 mt-4">
                     {isThreat && (
                         <button
                             onClick={handleStartConversation}
