@@ -1,8 +1,10 @@
-venv/
+.DS_StoreBackend/.DS_Store
+# Python
 __pycache__/
 *.pyc
+
+# Environment files
 .env
-pet_state.json
-last_screenshot.png
-*.log
-.DS_Store.DS_Store
+
+# macOS junk
+.DS_Store
