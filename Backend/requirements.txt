@@ -1,4 +1,4 @@
-# CyberPet Backend - Unified Requirements
+# FrostByte Backend - Unified Requirements
 # Combines original backend + Gemini Computer Use features
 
 # Core FastAPI & Web Server
