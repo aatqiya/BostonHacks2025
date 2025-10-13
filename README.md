@@ -29,6 +29,7 @@ FrostByte is a desktop app with a Chrome extension that monitors your browsing i
 - **Git & GitHub** – Version control and collaboration.
 
 ## Setup & Installation
+- Optimized for macOS use
 
 ### Prerequisites
 - Python 3.8+ (Python 3.11 recommended for stability)
@@ -109,6 +110,65 @@ curl -X POST http://localhost:8000/api/monitoring/start
 # Stop threat detection
 curl -X POST http://localhost:8000/api/monitoring/stop
 ```
+
+## How to Use
+
+Once the application is running, your pet, Byte, will appear at the bottom right of your screen.
+Click on Byte to open up the dashboard, viewing your health and statistics.
+
+In the project directory, open the backend_debug.html file to view our comprehensive backend visualizer.
+Click on "Start" or "Stop Monitoring" to enable Gemini 2.5 computer use threat protection.
+You can also manually trigger a screenshot, threat detection alert, or reset your pet's statistics. 
+
+Once a threat is detected, a Threat Detection Alert will appear. This gives you the opportunity to click "Learn More," where our Cyber agent will discuss the threat with you and answer any questions.
+
+Here is a sample email to trigger the threat detection alert automatically:
+(Note: This will not work if our app detects that the email is written inside a note/text editor app.
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+From: security@paypa1.com
+Subject: URGENT: Your PayPal Account Will Be Limited
+
+Dear Valued Customer,
+
+We have detected suspicious activity on your PayPal account. Your account will be permanently limited within 24 hours unless you verify your information immediately.
+
+Click here to verify your account now:
+http://paypa1-secure-verification.xyz/login.php
+
+Failure to complete verification will result in:
+- Account suspension
+- Loss of access to funds
+- Permanent closure
+
+This is an automated message. Do not reply to this email.
+
+PayPal Security Team
+Copyright © 1999-2024 PayPal. All rights reserved.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+If you've installed the browser extension, click on the extension icon the view your statistics. The extension tracks your health and all the risks you've encountered while using your browser.
+
+Test the threat detection by creating an account on any website and entering a poorly written password.
+
+Here are some fake suspicious links to test our threat detection as well:
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+http://facebook-security-update.com
+http://paypal-account-verification.net
+http://bankofamerica-password-reset.org
+http://apple-id-verification.xyz
+http://microsoft-account-security-alert.com
+Malware-related patterns:
+
+http://free-antivirus-download-2024.com
+http://cracked-software-malware.net
+http://virus-cleaner-tool.org
+http://fake-adobe-flash-update.com
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## How It Works
 
