@@ -156,11 +156,14 @@ Here are some fake suspicious links to test our threat detection as well:
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 
+Phishing-related patterns:
+
 http://facebook-security-update.com
 http://paypal-account-verification.net
 http://bankofamerica-password-reset.org
 http://apple-id-verification.xyz
 http://microsoft-account-security-alert.com
+
 Malware-related patterns:
 
 http://free-antivirus-download-2024.com
