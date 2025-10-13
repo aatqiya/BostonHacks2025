@@ -184,12 +184,12 @@ export default function InterventionPopup() {
                 <div className="text-center mb-4">
                     <div className="text-6xl mb-2">🚨</div>
                     <h1 className="text-3xl font-bold text-red-600 mb-2">
-                        SECURITY THREAT!
+                        FREEZE!
                     </h1>
                     <div className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${data.severity >= 80 ? 'bg-red-600 text-white' :
-                            data.severity >= 60 ? 'bg-orange-500 text-white' :
-                                data.severity >= 40 ? 'bg-yellow-500 text-black' :
-                                    'bg-yellow-400 text-black'
+                        data.severity >= 60 ? 'bg-orange-500 text-white' :
+                            data.severity >= 40 ? 'bg-yellow-500 text-black' :
+                                'bg-yellow-400 text-black'
                         }`}>
                         {getSeverityText(data.severity || 50)} RISK
                     </div>

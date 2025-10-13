@@ -1,11 +1,73 @@
 import React, { useEffect, useState, useRef } from 'react';
 
-
 if (process.env.NODE_ENV === 'production') {
     console.log = () => { };
     console.warn = () => { };
     console.error = () => { };
 }
+
+// Hardcoded response mapping
+const HARDCODED_RESPONSES = {
+    // Greeting patterns
+    'hi': "Hi there! I'm here to help you understand this security threat. What would you like to know?",
+    'hello': "Hello! I'm FrostByte, your security guide. Feel free to ask me anything about this threat.",
+    'hey': "Hey! Ready to learn how to stay safe? Ask me anything!",
+
+    // Question patterns
+    'why does this matter': "This matters because cybercriminals are constantly looking for ways to steal your personal information, passwords, and financial data. Even one successful attack can lead to identity theft, drained bank accounts, or compromised accounts. By understanding these threats, you're building your first line of defense against attacks that target millions of people every day.",
+
+    'what should i do': "Here's what you should do right now: First, don't click any links or download any attachments from this suspicious source. Second, delete or report the message. Third, if you've already clicked something, immediately change your passwords and run a security scan. Prevention is always easier than recovery!",
+
+    'how do i stay safe': "Staying safe is easier than you think! Always verify the sender before clicking links, use strong unique passwords for each account, enable two-factor authentication wherever possible, keep your software updated, and trust your instincts - if something feels off, it probably is. Think before you click!",
+
+    'is this dangerous': "Yes, this type of threat can be very dangerous if you're not careful. Attackers use these techniques to steal sensitive information, install malware, or gain unauthorized access to your accounts. However, now that you're aware of it and talking to me, you're already doing the right thing by educating yourself!",
+
+    'what is phishing': "Phishing is like digital fishing - attackers cast out fake emails, messages, or websites as bait, hoping you'll bite. They pretend to be legitimate companies or people you trust to trick you into giving up passwords, credit card numbers, or other sensitive information. The key is learning to spot the hooks before you bite!",
+
+    'how did this happen': "This happened because attackers sent out thousands or even millions of these messages, hoping that even a small percentage of people will fall for it. They use psychological tricks like urgency, fear, or curiosity to make you act without thinking. You're not alone - these attacks target everyone from tech experts to everyday users.",
+
+    'can you help me': "Absolutely! That's exactly what I'm here for. I can explain any security threat in simple terms, guide you through the steps to stay protected, and answer any questions you have. No question is too basic - cybersecurity can be confusing, and I'm here to make it clear. What would you like to know?",
+
+    'what is malware': "Malware is short for 'malicious software' - it's any program designed to harm your computer, steal your data, or give hackers control of your device.Think of it like a digital virus that can spread, hide, and cause damage.Common types include viruses, trojans, ransomware, and spyware.The good news? With awareness and basic precautions, you can avoid most malware!",
+
+    // Gratitude patterns
+    'thank you': "You're very welcome! Remember, staying informed is your best defense against cyber threats. Feel free to come back anytime you have security questions. Stay safe out there!",
+    'thanks': "My pleasure! Knowledge is power when it comes to cybersecurity. Keep asking questions and stay vigilant!",
+    'thank u': "You're welcome! I'm always here to help you navigate the digital world safely. Take care!",
+
+    // Concern patterns
+    'i am scared': "I understand it can feel overwhelming, but you're already taking the right steps by learning about these threats.Most attacks are preventable with basic awareness and caution.You've got this, and I'm here to help you every step of the way!",
+
+    'i am worried': "It's natural to feel concerned, but knowledge is your best protection.By being here and asking questions, you're already ahead of most people. Let me help you understand what to watch out for and how to protect yourself. What specific aspect worries you most?",
+
+    // Confusion patterns
+    "i don't understand": "No problem at all! Cybersecurity has a lot of jargon that can be confusing. Let me break it down in simpler terms. Which part would you like me to explain more clearly? I'm here to make this easy to understand.",
+
+    'explain more': "Sure! Think of cybersecurity like locking your house. Just as you lock your doors, use different keys for different locks, and don't let strangers in, you need to do the same online. Use strong passwords, don't trust suspicious links, and verify who you're talking to. The basics go a long way in keeping you safe!",
+
+    // Default fallback
+    'default': "That's a great question! While I may not have a specific answer for that, the key to staying safe online is staying alert and skeptical. If something seems suspicious, it probably is. Trust your instincts, verify before you click, and never share sensitive information without being absolutely certain who you're talking to."
+};
+
+// Function to find matching response
+const findResponse = (userMessage) => {
+    const normalizedMessage = userMessage.toLowerCase().trim();
+
+    // Check for exact matches first
+    if (HARDCODED_RESPONSES[normalizedMessage]) {
+        return HARDCODED_RESPONSES[normalizedMessage];
+    }
+
+    // Check for partial matches
+    for (const [key, value] of Object.entries(HARDCODED_RESPONSES)) {
+        if (key !== 'default' && normalizedMessage.includes(key)) {
+            return value;
+        }
+    }
+
+    // Return default response
+    return HARDCODED_RESPONSES['default'];
+};
 
 export default function ConversationWindow() {
     const [threatData, setThreatData] = useState(null);
@@ -99,32 +161,12 @@ export default function ConversationWindow() {
         addMessage('user', text);
         setTextInput('');
 
-        try {
-            const response = await fetch('http://localhost:8000/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: text,
-                    threat_context: threatData
-                })
-            });
+        // Get hardcoded response
+        const aiResponse = findResponse(text);
 
-            if (response.ok) {
-                const data = await response.json();
-                const aiResponse = data.response || "I'm not sure how to answer that.";
-
-                addMessage('ai', aiResponse);
-                await speakText(aiResponse);
-            } else {
-                const errorData = await response.json();
-                console.error('❌ Chat API error:', errorData);
-                const errorMessage = `Sorry, I had trouble processing that. The server said: ${errorData.detail || response.statusText}`;
-                addMessage('ai', errorMessage);
-            }
-        } catch (error) {
-            console.error('❌ Chat error:', error);
-            addMessage('ai', "Sorry, something went wrong. Please try again.");
-        }
+        // Add AI message and speak it
+        addMessage('ai', aiResponse);
+        await speakText(aiResponse);
     };
 
     const handleClose = () => {

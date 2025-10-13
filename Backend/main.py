@@ -506,6 +506,7 @@ def _save_as_latest(binary: bytes, ext: str = ".mp3") -> Path:
 
 @app.get('/eleven/voices')
 def list_voices():
+    """List all available ElevenLabs voices"""
     key = _get_api_key()
     if not key:
         return JSONResponse({"error": "ELEVENLABS_API_KEY not set"}, status_code=400)
@@ -521,26 +522,22 @@ def list_voices():
 
 @app.post('/eleven/tts')
 async def eleven_tts(text: str = Form(...), voice_id: Optional[str] = Form(None), fmt: str = Form('mp3')):
+    """
+    Text-to-Speech using ElevenLabs API
+    Defaults to Jessica (alias: Frost) voice: g6xIsTj2HwM6VR4iXFCw
+    """
     key = _get_api_key()
     if not key:
         return JSONResponse({"error": "ELEVENLABS_API_KEY not set"}, status_code=400)
     if fmt not in ('mp3', 'wav'):
         return JSONResponse({"error": "fmt must be 'mp3' or 'wav'"}, status_code=400)
 
+    # Default to Jessica/Frost voice if no voice_id provided
     if not voice_id:
-        try:
-            vresp = requests.get(f"{ELEVEN_BASE}/voices",
-                                 headers={'xi-api-key': key}, timeout=10)
-            vresp.raise_for_status()
-            payload = vresp.json()
-            voices = payload.get('voices') if isinstance(
-                payload, dict) else payload
-            if isinstance(voices, list) and voices:
-                voice_id = voices[0].get('voice_id') or voices[0].get('id')
-        except requests.RequestException:
-            voice_id = None
-    if not voice_id:
-        return JSONResponse({"error": "No voice_id available"}, status_code=400)
+        voice_id = "g6xIsTj2HwM6VR4iXFCw"  # Jessica (Frost)
+        print(f"🎤 Using default voice: Jessica (Frost) - {voice_id}")
+    else:
+        print(f"🎤 Using custom voice: {voice_id}")
 
     url = f"{ELEVEN_BASE}/text-to-speech/{voice_id}"
     headers = {
@@ -568,6 +565,7 @@ async def eleven_tts(text: str = Form(...), voice_id: Optional[str] = Form(None)
 
 @app.get("/voice/latest")
 def voice_latest():
+    """Get the most recently generated voice file"""
     cands = sorted(VOICES_DIR.glob("latest.*"),
                    key=lambda p: p.stat().st_mtime, reverse=True)
     if not cands:
@@ -589,6 +587,7 @@ async def startup_event():
     else:
         print("\n✅ Simple backend initialized (Gemini modules not available)")
     print("🎤 ElevenLabs TTS endpoints available")
+    print("🎤 Default voice: Jessica (Frost) - g6xIsTj2HwM6VR4iXFCw")
 
 
 @app.get('/api/debug/list-models')
