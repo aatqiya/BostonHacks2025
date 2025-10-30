@@ -1,4 +1,4 @@
-# backend/gemini_computer_use.py - COMPLETE FIXED VERSION
+# backend/gemini_computer_use.py - FIXED VERSION
 
 from google import genai
 from google.genai import types
@@ -42,19 +42,38 @@ class GeminiComputerUse:
                 f"[{datetime.now().strftime('%H:%M:%S')}] 🤖 Analyzing with Gemini 2.5 Computer Use...")
 
             # Create the prompt
-            prompt = """Analyze this screenshot for cybersecurity threats.
+            prompt = """Analyze this screenshot for ACTIVE cybersecurity threats happening RIGHT NOW.
 
-Look for:
-1. Phishing emails (suspicious sender, urgent language, grammar errors, fake URLs like paypa1.com)
-2. Fake login pages (URL doesn't match expected site, suspicious domain)
-3. Suspicious popups (fake virus warnings, tech support scams, "Your computer is infected")
-4. Dangerous downloads (unexpected file downloads, suspicious extensions like .exe)
-5. Insecure data entry (HTTP forms collecting passwords or credit cards)
+ONLY flag these ACTIVE web-based threats:
+1. Phishing emails CURRENTLY OPEN in email clients (suspicious sender, urgent language, fake URLs like paypa1.com)
+2. Phishing text messages/SMS (suspicious banking/financial texts, fake delivery notifications)
+3. Fake login pages CURRENTLY DISPLAYED in browsers (URL doesn't match expected site, suspicious domain)
+4. Active suspicious popups ON SCREEN (fake virus warnings, tech support scams, "Your computer is infected")
+5. Browser download prompts for suspicious files (.exe, .scr, .zip from unknown sources)
+6. HTTP password/credit card forms ACTIVELY being filled out
+7. Social engineering messages (fake tech support, urgent account warnings)
+
+EXAMPLES of threat categorization:
+- Text message from "HSBC" with suspicious link → "Phishing Text"
+- Email from "PayPal" with fake URL → "Phishing Email"
+- Browser showing fake "Apple ID" login → "Fake Login Page"
+- Popup saying "Your Mac is infected" → "Malicious Popup"
+- Download dialog for random .exe file → "Suspicious Download"
+- Password form on HTTP site → "Insecure Form"
+- Message claiming to be from tech support → "Social Engineering"
+
+IGNORE these safe items:
+- Personal files on desktop (videos, documents, photos)
+- Normal desktop icons and folders
+- Legitimate software applications
+- System files and folders
+- Personal media files (.mp4, .jpg, .pdf, etc.)
+- Apps like Terminal, Finder, VS Code, etc.
 
 Return ONLY a valid JSON object with this EXACT structure (no markdown, no backticks, no other text):
 {
     "threat_detected": true or false,
-    "threat_type": "phishing_email" or "fake_login" or "suspicious_popup" or "dangerous_download" or "insecure_form" or null,
+    "threat_type": "Phishing Email" or "Phishing Text" or "Fake Login Page" or "Malicious Popup" or "Suspicious Download" or "Insecure Form" or "Social Engineering" or null,
     "confidence": 0-100,
     "explanation": "Technical explanation of why this is dangerous",
     "user_friendly_message": "Simple, friendly warning message for the user"
@@ -63,19 +82,10 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no backt
 If no threats detected, return:
 {"threat_detected": false, "threat_type": null, "confidence": 0, "explanation": "Screen appears safe", "user_friendly_message": ""}
 
-Be cautious but not overly sensitive - only flag CLEAR, OBVIOUS threats."""
+Be CONSERVATIVE - only flag OBVIOUS, ACTIVE web threats. Desktop files and normal apps are NOT threats."""
 
-            # Configure Gemini with computer use tool
-            # Note: We're using computer_use but excluding action functions since we only want analysis
+            # Configure Gemini for text-only analysis (no computer use tools needed)
             config = types.GenerateContentConfig(
-                tools=[
-                    types.Tool(
-                        computer_use=types.ComputerUse(
-                            # Exclude all actions - we only want screenshot analysis
-                            excluded_predefined_functions=["*"]
-                        )
-                    )
-                ],
                 system_instruction="You are a cybersecurity analyst. Analyze screenshots for security threats and return structured JSON responses. Never take actions, only analyze."
             )
 
@@ -95,9 +105,9 @@ Be cautious but not overly sensitive - only flag CLEAR, OBVIOUS threats."""
                 )
             ]
 
-            # Call Gemini
+            # Call Gemini - Use standard model instead of computer-use model
             response = self.client.models.generate_content(
-                model='models/gemini-2.5-computer-use-preview-10-2025',
+                model='models/gemini-2.0-flash-exp',  # Changed to standard model
                 contents=contents,
                 config=config
             )
@@ -125,6 +135,18 @@ Be cautious but not overly sensitive - only flag CLEAR, OBVIOUS threats."""
 
             # Parse JSON
             result = json.loads(response_text)
+
+            # Apply confidence threshold - only report threats with >70% confidence
+            if result.get("threat_detected") and result.get("confidence", 0) < 70:
+                print(
+                    f"🔍 Low confidence threat ignored: {result.get('threat_type')} ({result.get('confidence')}%)")
+                result = {
+                    "threat_detected": False,
+                    "threat_type": None,
+                    "confidence": 0,
+                    "explanation": "Low confidence detection ignored",
+                    "user_friendly_message": ""
+                }
 
             # Log results
             if result.get("threat_detected"):
